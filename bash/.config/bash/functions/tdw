@@ -49,8 +49,17 @@ tdw() {
       echo "tdw: required agent '$binary' is not installed"
       return 1
     fi
-    local editor_pane agent_pane
-    editor_pane=$(tmux new-session -d -s "$session" -c "$root" -n "$(basename "$root")" -P -F '#{pane_id}')
+    # Create the window at the terminal's size: tmux hands a later resize out
+    # equally across the stacked rows, which would grow the shell past 15%
+    local size lines="" cols="" editor_pane agent_pane
+    local -a size_args=()
+    if size=$({ stty size < /dev/tty; } 2>/dev/null) && [[ $size =~ ^[0-9]+\ [0-9]+$ ]]; then
+      read -r lines cols <<<"$size"
+    else
+      lines=${LINES:-} cols=${COLUMNS:-}
+    fi
+    [[ -n $lines && -n $cols && $lines -gt 0 && $cols -gt 0 ]] && size_args=(-x "$cols" -y "$lines")
+    editor_pane=$(tmux new-session -d -s "$session" -c "$root" -n "$(basename "$root")" "${size_args[@]}" -P -F '#{pane_id}')
     tmux set-option -t "$session" @dw_root "$root"
     # Shell across the bottom 15%, then the agent on the right half of the editor row
     tmux split-window -v -l 15% -t "$editor_pane" -c "$root"

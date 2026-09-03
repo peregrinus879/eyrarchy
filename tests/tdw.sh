@@ -5,7 +5,14 @@
 # three agents and their continue forms; re-attach; the root-collision guard;
 # and the usage and missing-agent refusals. Stub agents record their arguments;
 # attaching is recorded instead of performed, since the fixture has no terminal.
+# The fixture detaches itself from any controlling terminal, so the launcher
+# sizes the window from LINES and COLUMNS and the geometry is deterministic.
 set -euo pipefail
+
+if [[ -z ${TDW_FIXTURE_DETACHED:-} ]]; then
+  command -v setsid >/dev/null || { printf 'FAIL: setsid is required\n' >&2; exit 1; }
+  exec setsid -w env TDW_FIXTURE_DETACHED=1 LINES=50 COLUMNS=200 bash "$0" "$@"
+fi
 
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 TMP=$(mktemp -d)
@@ -18,8 +25,9 @@ fail() {
   exit 1
 }
 
-# Panes run bash without profiles so the stub PATH is what they see.
-printf 'set -g default-command "bash --noprofile --norc"\nset -g default-size 120x40\n' >"$TMP/tmux.conf"
+# Panes run bash without profiles so the stub PATH is what they see. The
+# default size must lose to the launcher's explicit size.
+printf 'set -g default-command "bash --noprofile --norc"\nset -g default-size 80x24\n' >"$TMP/tmux.conf"
 tmux() {
   case ${1:-} in
     attach-session | switch-client)
@@ -71,6 +79,7 @@ case_layout() {
     if ((fields[2] > 0)); then shell=("${fields[@]}"); elif ((fields[1] == 0)); then editor=("${fields[@]}"); else agent=("${fields[@]}"); fi
   done < <(tmux list-panes -t "=$session" -F '#{pane_active} #{pane_left} #{pane_top} #{pane_width} #{pane_height} #{window_width} #{window_height}')
   ((${#editor[@]} && ${#agent[@]} && ${#shell[@]})) || fail "could not classify the three panes"
+  ((shell[5] == 200 && shell[6] == 50)) || fail "window was not created at the terminal size (${shell[5]}x${shell[6]})"
   ((agent[0] == 1)) || fail "focus did not land on the agent pane"
   ((agent[1] == editor[3] + 1)) || fail "agent pane does not sit right of the editor"
   (( editor[3] - agent[3] <= 1 && agent[3] - editor[3] <= 1 )) || fail "editor and agent are not split 50/50 (${editor[3]} vs ${agent[3]})"
