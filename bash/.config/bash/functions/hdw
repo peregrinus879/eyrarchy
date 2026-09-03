@@ -1,6 +1,6 @@
 # Create or focus a Herdr Dev Workspace: one herdr workspace per project holding
 # Omarchy's dev layout in one tab named after the project: the AI agent on the
-# left at full height, $EDITOR on the right over a shell on the bottom 15% of
+# left at full height, $EDITOR on the right over a shell on the bottom 25% of
 # that column (50/50 by width). Focus lands on the agent.
 # Usage: hdw <cc|cx|oc> [-c]   cc = Claude Code, cx = Codex, oc = OpenCode;
 # -c continues the agent's last conversation in this project. Bare hdw
@@ -87,10 +87,10 @@ hdw() {
     agent_pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
     tab_id=$(jq -r '.result.tab.tab_id' <<<"$created")
     herdr tab rename "$tab_id" "$(basename "$root")" >/dev/null
-    # The agent keeps the left half at full height and the focus; the editor takes the right half, with the shell on its bottom 15%
+    # The agent keeps the left half at full height and the focus; the editor takes the right half, with the shell on its bottom 25%
     editor_pane=$(herdr pane split "$agent_pane" --direction right --ratio 0.5 --cwd "$root" --no-focus |
       jq -r '.result.pane.pane_id')
-    herdr pane split "$editor_pane" --direction down --ratio 0.85 --cwd "$root" --no-focus >/dev/null
+    herdr pane split "$editor_pane" --direction down --ratio 0.75 --cwd "$root" --no-focus >/dev/null
     herdr pane run "$agent_pane" "$command" >/dev/null
     herdr pane run "$editor_pane" "${EDITOR:-nvim} ." >/dev/null
     mkdir -p "$state_dir"
