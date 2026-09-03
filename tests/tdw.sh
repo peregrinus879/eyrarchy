@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fixtures for the tdw workspace launcher on an isolated tmux server: one
-# window named after the project with the editor top-left, the agent top-right
-# at half the width, a shell across the bottom 15%, and focus on the agent; the
+# window named after the project with the editor top-left over a 15% shell,
+# the agent at full height on the right half, and focus on the agent; the
 # three agents and their continue forms; re-attach; the root-collision guard;
 # and the usage and missing-agent refusals. Stub agents record their arguments;
 # attaching is recorded instead of performed, since the fixture has no terminal.
@@ -83,7 +83,8 @@ case_layout() {
   ((agent[0] == 1)) || fail "focus did not land on the agent pane"
   ((agent[1] == editor[3] + 1)) || fail "agent pane does not sit right of the editor"
   (( editor[3] - agent[3] <= 1 && agent[3] - editor[3] <= 1 )) || fail "editor and agent are not split 50/50 (${editor[3]} vs ${agent[3]})"
-  ((shell[3] == shell[5])) || fail "shell does not span the window width"
+  ((shell[3] == editor[3])) || fail "shell does not sit under the editor at its width"
+  ((agent[4] == agent[6])) || fail "agent pane does not take the full window height"
   ((shell[4] * 100 <= 15 * shell[6] + 100 && shell[4] * 100 >= 15 * shell[6] - 100)) || fail "shell height is not 15% (${shell[4]} of ${shell[6]})"
   ((editor[4] + shell[4] + 1 == shell[6])) || fail "editor row and shell do not fill the window height"
   wait_for_call "claude" || fail "claude did not start in the agent pane"
