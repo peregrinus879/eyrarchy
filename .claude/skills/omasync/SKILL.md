@@ -29,19 +29,19 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
    - the `claude` alias (`--effort max`) against `default/bash/aliases`: every Omarchy launcher that runs `claude` (`cx`, `ix`, `icx`) must still compose with it through alias expansion
-   - the `OPENCODE_DISABLE_EXTERNAL_SKILLS` and `OPENCODE_ENABLE_EXA` exports: Omarchy sets no `OPENCODE_*` variable today, so they stay additive unless that changes
+   - the `OPENCODE_DISABLE_EXTERNAL_SKILLS` and `OPENCODE_ENABLE_EXA` exports stay additive unless Omarchy starts setting `OPENCODE_*` variables
    - `y()` is additive (Yazi is not in Omarchy)
    - the sourced `tdw` and `hdw` twins against `default/bash/fns/tmux` and `default/bash/fns/herdr`: they stay additive alongside `tdl`/`tds` and `hdl`/`hds`, and a change to either lands in EyrWSL in the same session (`make twins`)
 3. Compare `hypr/bindings.lua` against the installed defaults at `/usr/share/omarchy/default/hypr/bindings/` (`applications.lua` carries the app and web-app set) and the user seed at `/usr/share/omarchy/config/hypr/bindings.lua`; the shipped `omarchy` skill owns the binding API, inspection commands, and validation loop:
    - every `hl.unbind` target must still match a default chord, and personal chords must not collide with new defaults
-   - verify live registration by description and modmask via `hyprctl binds`; quattro registers Lua bindings as opaque `__lua` dispatchers, so exec strings never appear there
+   - verify live registration by description and modmask via `hyprctl binds`; Omarchy registers Lua bindings as opaque `__lua` dispatchers, so exec strings never appear there
    - the file stays personal overrides only; defaults are never replicated
    - `make verify` runs `scripts/check-bindings.sh` for the unbind-target and collision assertions; run it after every change here
 4. Compare `yazi/yazi.toml` against official Yazi docs, and the `nvim/` plugin specs against `obsidian.nvim/` and the render-markdown.nvim README
 5. App parity sweep: diff `pacman -Qe` against the installed default manifest (`/usr/share/omarchy/install/omarchy-base.packages` plus hardware conditionals) and the optional installers (`omarchy-install-*`); classify each extra as personal, optional-installed, or retired survivor, and account for provider resolution (`extra/neovim` satisfies the `nvim` entry)
 6. Tool-path integrity: every managed CLI in `~/.local/bin` (the `omarchy-mise-install` lines in `/usr/share/omarchy/install/user/mise.sh`: claude, codex, opencode, gemini, copilot, gh, and the rest) must be the Omarchy mise wrapper; `omarchy-refresh-applications` deletes and rewrites them through `omarchy-mise-install`, so verify with `head -3` on each and `mise ls --current`. Hand-installed scripts and the EyrAgents spar links are unmanaged and survive. Native install stores are removable only after confirming the running binary path via `/proc/<pid>/exe`
 7. Webapp entries: compare the webapp launchers in `~/.local/share/applications` against the current Omarchy default set and remove stale ones with `omarchy-webapp-remove`; personal bindings launch by URL and do not depend on desktop entries
-8. Cross-repo coordination: read the sibling ledgers for items assigned to this repo and for stale entries describing this host's environment; after Omarchy migrations run, re-check the four agent-skills dirs (`~/.agents/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.pi/agent/skills`) and the `omarchy-crash-watch.service` state
+8. Cross-repo coordination: read the sibling ledgers for items assigned to this repo and for stale entries describing this host's environment
 9. For each difference, classify it:
    - **Intentional personal customization**: documented in `DEVIATIONS.md`, should stay different
    - **New upstream addition**: added upstream after the last sync, should be reviewed for inclusion

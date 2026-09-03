@@ -87,7 +87,7 @@ Checklist before stowing:
 - The vault is synced to `~/Projects/vault` (or `OBSIDIAN_VAULT` is set) if you use the Obsidian workflow
 - Any existing conflicting files were removed
 
-Remove existing files that would conflict with stow. The guarded preparation script derives the owned paths from the package files and removes only folded directory links left by an older deployment, dangling symlinks left by a moved or deleted clone, and regular files at owned paths (Omarchy clobber artifacts); live leaf links stay for Stow to manage, and anything unrecognized aborts the run before anything is removed:
+Remove existing files that would conflict with stow. The guarded preparation script derives the owned paths from the package files and removes only folded directory links left by a folding deployment, dangling symlinks left by a moved or deleted clone, and regular files at owned paths (Omarchy clobber artifacts); live leaf links stay for Stow to manage, and anything unrecognized aborts the run before anything is removed:
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
@@ -142,7 +142,7 @@ If the old clone is no longer available, `make clean` (section 3) removes its da
 
 ### Recovery After Omarchy Config Resets
 
-`omarchy-reinstall-configs` overwrites `~/.bashrc` and `~/.config/` from Omarchy defaults (on quattro via `cp -af /etc/skel/. ~/`). After running it, `git restore` any repo files it clobbered through stow symlinks, then run `make recover` from the repo root (the Prepare cleanup plus a re-stow).
+`omarchy-reinstall-configs` overwrites `~/.bashrc` and `~/.config/` from Omarchy defaults (via `cp -af /etc/skel/. ~/`). After running it, `git restore` any repo files it clobbered through stow symlinks, then run `make recover` from the repo root (the Prepare cleanup plus a re-stow).
 
 `omarchy-refresh-hyprland` (and `omarchy-refresh-config` generally) copies shipped defaults over existing files with `cp -f`, which writes through a stow symlink into the repo working tree; the symlink itself survives and a timestamped `.bak` of the personal content is left beside it. After it runs, `git restore hypr/.config/hypr/` is the whole recovery.
 

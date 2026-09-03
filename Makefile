@@ -121,7 +121,7 @@ twins:
 # each file to its stow target, so every package file is checked, including
 # one being added in the working tree; resolved paths are compared so a link
 # to the wrong file fails too. Every managed parent must be a real directory:
-# a folded one means an older deployment that make restow has not replaced.
+# a folded one means a folding deployment that make restow has not replaced.
 # The Git identity check prints no value. The unbind chord check reads the
 # installed Omarchy defaults, so it fails closed off-host.
 verify: check twins

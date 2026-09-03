@@ -9,12 +9,12 @@
 # managed parent. Every owned path is classified before anything is removed,
 # so an unrecognized entry aborts the run untouched:
 #   - a managed parent that is a symlink resolving into this repo is removed:
-#     a folded directory link left by an older, folding deployment
+#     a folded directory link left by a folding deployment
 #   - a leaf link that resolves into this repo is left alone: Stow owns it
 #   - a dangling link, parent or leaf, whose text names a package path this
 #     repo has (a moved or deleted clone) is removed
 #   - a regular file at an owned leaf path is removed as an Omarchy clobber
-#     artifact (omarchy-refresh-* and the quattro upgrade write real files
+#     artifact (omarchy-refresh-* and omarchy-reinstall-configs write real files
 #     through or over stowed links)
 #   - an entry beneath a folded parent queued for removal is skipped: it is
 #     repo working-tree content and disappears with the fold

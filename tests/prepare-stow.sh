@@ -83,7 +83,7 @@ case_no_folding() {
   local home="$TMP/nofold/home" repo="$TMP/nofold/home/Projects/eyrarchy" path
   mkdir -p "$home/.config/hypr" "$home/.config/nvim/lua/plugins"
   make_clone "$repo"
-  # Folded links as an older deployment created them: relative, so Stow still
+  # Folded links as a folding deployment created them: relative, so Stow still
   # recognizes them as its own.
   ln -s ../Projects/eyrarchy/bash/.config/bash "$home/.config/bash"
   ln -s ../Projects/eyrarchy/yazi/.config/yazi "$home/.config/yazi"
