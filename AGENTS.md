@@ -5,7 +5,7 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 ## Load Map
 
 - Claude Code loads this file through the root `CLAUDE.md` `@AGENTS.md` import; skills load on invocation only.
-- The `Makefile` is the single source of the package list (`scripts/prepare-stow.sh` consumes it); `README.md` carries the human-facing setup, verification, and maintenance detail; script headers own local constraints.
+- The `Makefile` is the single source of the package list (`scripts/prepare-stow.sh` consumes it); `references.txt` lists the reference clones `/omasync` needs, and the family union of those files owns `~/Projects/quarry`; `README.md` carries the human-facing setup, verification, and maintenance detail; script headers own local constraints.
 - `docs/maintenance.md` owns unresolved decisions, deferred work, active limitations, and dated revalidation evidence; read it before package removals, Omarchy updates or refreshes, or work on a deferred item. Prose describes current behavior; Git history owns provenance.
 
 ## Invariants

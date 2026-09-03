@@ -1,0 +1,8 @@
+# Reference clones the omasync skill compares against, under ~/Projects/quarry.
+# One per line: <directory> <git URL>. The family union of every sibling's
+# references.txt defines the quarry: make refs clones what is listed here and
+# missing, updates every listed clone, and removes clones no family repository
+# lists. Update a URL here when make refs reports a repointed origin.
+omarchy https://github.com/omacom/omarchy.git
+omarchy-pkgs https://github.com/omacom/omarchy-pkgs.git
+obsidian.nvim https://github.com/obsidian-nvim/obsidian.nvim.git

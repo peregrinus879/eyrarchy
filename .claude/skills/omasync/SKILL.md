@@ -9,7 +9,7 @@ Source configs from the installed Omarchy defaults, the reference repos, and off
 
 ## Sources
 
-Local reference clones live under `~/Projects/quarry/`:
+Local reference clones live under `~/Projects/quarry/`; `references.txt` at the repo root names the ones this repo needs, and the family union of every sibling's file defines the quarry (`make refs` clones, updates, and prunes to it):
 
 - `omarchy/` - main repo for bash, tmux, and general Omarchy defaults; `make refs` keeps it on the upstream default branch, which upstream moves between releases, so pin release comparisons to the installed version's tag (`git show <installed-tag>:<path>`)
 - `omarchy-pkgs/` - Omarchy's package build recipes, for package version and dependency questions
@@ -26,7 +26,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 
 ## Workflow
 
-1. Run `make refs` first, every time: `scripts/update-references.sh` resolves each clone under `~/Projects/quarry/` to its current GitHub location, repoints a moved remote, checks out the upstream default branch, and fast-forwards it. Fix any clone it reports before comparing anything, and when it reports a repointed origin, update that URL in `DEVIATIONS.md` (Reference Sources). Updating the clones is this skill's job, never H's preparation.
+1. Run `make refs` first, every time: `scripts/update-references.sh` clones what `references.txt` lists and the quarry lacks, resolves each listed clone to its current GitHub location and repoints a moved remote, checks out the upstream default branch and fast-forwards it, and removes clean clones no family repository lists. Fix anything it reports before comparing, and when it reports a repointed origin, update that URL in `references.txt` and `DEVIATIONS.md` (Reference Sources). When this repo starts or stops using a reference, change `references.txt`; the clones follow. Updating the quarry is this skill's job, never H's preparation.
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
    - the `claude` alias (`--effort max`) against `default/bash/aliases`: every Omarchy launcher that runs `claude` (`cx`, `ix`, `icx`) must still compose with it through alias expansion

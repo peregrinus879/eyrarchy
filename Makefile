@@ -18,7 +18,8 @@ TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   bash/.config/bash/functions/tdw \
   bash/.config/bash/functions/hdw \
   yazi/.config/yazi/yazi.toml \
-  scripts/update-references.sh
+  scripts/update-references.sh \
+  tests/update-references.sh
 
 BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*)
 LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.lua)
@@ -59,7 +60,7 @@ help:
 	@echo "  verify    check and twins, then host checks: links, real parents, Git identity, Hyprland unbind chords and config errors"
 	@echo "  clean     Guarded stow preparation: leftover folds, dangling clone links, and clobber artifacts only (scripts/prepare-stow.sh)"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
-	@echo "  refs      Fast-forward the reference clones under ~/Projects/quarry to their current upstream default branches"
+	@echo "  refs      Clone, fast-forward, and prune the reference clones under ~/Projects/quarry to the family's references.txt files"
 
 stow:
 	$(STOW) -v $(PACKAGES)
@@ -163,7 +164,8 @@ clean:
 
 recover: clean restow
 
-# omasync step 1. Repoints a moved GitHub remote, then fast-forwards each clone
-# to its upstream default branch; a clone it cannot update fails the run.
+# omasync step 1. Clones what references.txt lists and the quarry lacks,
+# repoints moved GitHub remotes, fast-forwards each listed clone, and removes
+# unlisted clean clones; anything it cannot settle fails the run.
 refs:
 	@bash scripts/update-references.sh
