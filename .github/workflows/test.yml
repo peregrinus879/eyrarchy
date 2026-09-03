@@ -1,0 +1,29 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends git lua5.4 python3 shellcheck stow
+          command -v luac > /dev/null || sudo ln -s "$(command -v luac5.4)" /usr/local/bin/luac
+      - run: make lint
+      - run: make check
+  twins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone EyrWSL
+        run: git clone --depth 1 https://github.com/peregrinus879/eyrwsl.git "$RUNNER_TEMP/eyrwsl"
+      - run: make twins SIBLING="$RUNNER_TEMP/eyrwsl"

@@ -87,7 +87,7 @@ Checklist before stowing:
 - The vault is synced to `~/Projects/vault` (or `OBSIDIAN_VAULT` is set) if you use the Obsidian workflow
 - Any existing conflicting files were removed
 
-Remove existing files that would conflict with stow. The guarded preparation script removes only symlinks that resolve into this repo (tree-folded directory links first, so per-file removals never resolve through a fold into the repo) and regular files at owned paths (Omarchy clobber artifacts); anything unrecognized aborts the run untouched:
+Remove existing files that would conflict with stow. The guarded preparation script derives the owned paths from the package files and removes only folded directory links left by an older deployment, dangling symlinks left by a moved or deleted clone, and regular files at owned paths (Omarchy clobber artifacts); live leaf links stay for Stow to manage, and anything unrecognized aborts the run before anything is removed:
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
@@ -96,20 +96,20 @@ make clean
 
 ### 4. Stow
 
-Create symlinks for all packages:
+Create symlinks for all packages (the Makefile owns the package list):
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
-stow -v -t ~ bash hypr nvim yazi
+make stow
 ```
 
-Start a new terminal session, or run `source ~/.bashrc`, for the shell config to take effect.
+Stow runs without directory folding, so `~/.config/bash`, `~/.config/yazi`, and the other managed parents stay real directories that tools may write into; Stow reports any conflicting regular file without changing it. Inside a Hyprland session, `make stow` finishes with a forced reload and a config-error check. Start a new terminal session, or run `source ~/.bashrc`, for the shell config to take effect.
 
 ### Unstow
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
-stow -D -v -t ~ bash hypr nvim yazi
+make unstow
 ```
 
 ### Dry Run
@@ -118,7 +118,7 @@ Preview what stow would do without making changes:
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
-stow -v -n -t ~ bash hypr nvim yazi
+make dry-run
 ```
 
 ### Re-stow
@@ -127,19 +127,18 @@ To update symlinks after the repo content changes (same clone path):
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
-stow -R -v -t ~ bash hypr nvim yazi
+make restow
 ```
 
 To migrate from a different clone path, unstow from the old location first:
 
 ```bash
-cd /old/clone/path
-stow -D -v -t ~ bash hypr nvim yazi
+make -C /old/clone/path unstow
 cd ~/Projects/eyrie/eyrarchy
-stow -v -t ~ bash hypr nvim yazi
+make stow
 ```
 
-If the old clone is no longer available, run the full cleanup in section 3 before stowing.
+If the old clone is no longer available, `make clean` (section 3) removes its dangling links; then run `make stow`.
 
 ### Recovery After Omarchy Config Resets
 
@@ -151,7 +150,8 @@ If the old clone is no longer available, run the full cleanup in section 3 befor
 
 After stowing or changing owned packages:
 
-- Run `make verify` and `make lint` from the repo root (`verify` compares resolved paths, so stow tree-folding does not false-negative).
+- Run `make lint` and `make check` after any change; both are repository-only (ShellCheck; bash, Lua, and TOML syntax; the `tests/` fixtures), and GitHub Actions runs them on every push to `main` and every pull request, plus `make twins` against a fresh EyrWSL clone.
+- Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages: `check` and `twins`, then the stowed symlinks (compared by resolved path), every managed parent being a real directory, the Git identity (it must resolve to a GitHub no-reply address; the value is not printed), every `hl.unbind` target and personal chord in `bindings.lua` against the installed Omarchy defaults, and Hyprland config errors.
 - Start a fresh shell and confirm `printenv OPENCODE_DISABLE_EXTERNAL_SKILLS` and `printenv OPENCODE_ENABLE_EXA` each print `1`; non-interactive OpenCode launchers must supply both variables themselves.
 - Start a fresh shell and confirm `type y` shows the Yazi cd-on-exit function.
 - Confirm `type tdw` shows the tmux workspace function; from a project directory, `tdw cc` or `tdw oc` opens its session (`-c` continues that agent's last conversation; bare `tdw` re-attaches an existing session). Creating a session fails before changing tmux state when the selected agent is unavailable.
@@ -164,15 +164,17 @@ After stowing or changing owned packages:
 
 A repo-root `Makefile` keeps the package list in one place and wraps the routine commands. Run targets from the repo root on the Omarchy machine:
 
-- `make stow` / `make unstow` / `make dry-run` / `make restow` - the stow command sets from Setup
-- `make verify` - the Verify symlink checks, bash and Lua syntax, TOML validity, and, when the sibling clone is present, twin-file sync against EyrWSL; a missing sibling is reported as a skipped check
-- `make clean` - guarded stow preparation (`scripts/prepare-stow.sh`); owned links and clobber artifacts only, aborts on anything unrecognized
+- `make stow` / `make unstow` / `make dry-run` / `make restow` - the stow command sets over the package list
+- `make lint` - ShellCheck over the bash package, `scripts/`, and `tests/`; `.shellcheckrc` disables the upstream-derived warnings so new issues stand out
+- `make check` - repository-only checks: bash, Lua, and TOML syntax, then the `tests/` fixtures (`prepare-stow.sh` in a fake home, `check-bindings.sh` against fake defaults)
+- `make twins` - twin-file sync against the EyrWSL clone (`SIBLING`, default `~/Projects/eyrie/eyrwsl`); a missing sibling is reported as a skipped check
+- `make verify` - `check` and `twins`, then the host checks listed under Verify
+- `make clean` - guarded stow preparation (`scripts/prepare-stow.sh`); leftover folded links, dangling clone links, and clobber artifacts only, aborts before removing anything otherwise
 - `make recover` - the Recovery steps after `omarchy-reinstall-configs` (clean + restow)
-- `make lint` - ShellCheck over the bash package and `scripts/`; `.shellcheckrc` disables the upstream-derived warnings so new issues stand out
 
-`make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only.
+`make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only. `.github/workflows/test.yml` runs `make lint`, `make check`, and `make twins` on every push to `main` and every pull request.
 
-Periodically, review the local reference repos and official docs for upstream changes to overridden items, sync with `/omasync` or a manual comparison, and confirm every intentional difference is still documented in `DEVIATIONS.md`. Durable findings, known limitations, and deferred items live in [docs/maintenance.md](docs/maintenance.md).
+Periodically, review the local reference repos and official docs for upstream changes to overridden items, sync with `/omasync` or a manual comparison, and confirm every intentional difference is still documented in `DEVIATIONS.md`. Unresolved decisions, deferred work, active limitations, and dated evidence live in [docs/maintenance.md](docs/maintenance.md).
 
 ## Related Repos
 
