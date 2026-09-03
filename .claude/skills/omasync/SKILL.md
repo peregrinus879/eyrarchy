@@ -26,7 +26,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 
 ## Workflow
 
-1. Run `make refs` first, every time: `scripts/update-references.sh` resolves each clone under `~/Projects/quarry/` to its current GitHub location, repoints a moved remote, checks out the upstream default branch, and fast-forwards it. Fix any clone it reports before comparing anything. Updating the clones is this skill's job, never H's preparation.
+1. Run `make refs` first, every time: `scripts/update-references.sh` resolves each clone under `~/Projects/quarry/` to its current GitHub location, repoints a moved remote, checks out the upstream default branch, and fast-forwards it. Fix any clone it reports before comparing anything, and when it reports a repointed origin, update that URL in `DEVIATIONS.md` (Reference Sources). Updating the clones is this skill's job, never H's preparation.
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
    - the `claude` alias (`--effort max`) against `default/bash/aliases`: every Omarchy launcher that runs `claude` (`cx`, `ix`, `icx`) must still compose with it through alias expansion
