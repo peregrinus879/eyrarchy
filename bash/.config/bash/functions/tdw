@@ -1,7 +1,7 @@
 # Create or resume a Dev Workspace: one tmux session per project holding
-# Omarchy's dev layout in one window named after the project: $EDITOR top-left
-# over a shell on the bottom 15% of that column, the AI agent on the right at
-# full height (50/50 by width). Focus lands on the agent.
+# Omarchy's dev layout in one window named after the project: the AI agent on
+# the left at full height, $EDITOR on the right over a shell on the bottom 15%
+# of that column (50/50 by width). Focus lands on the agent.
 # Usage: tdw <cc|cx|oc> [-c]   cc = Claude Code, cx = Codex, oc = OpenCode;
 # -c continues the agent's last conversation in this project. Bare tdw
 # re-attaches an existing project session. One agent per workspace by design
@@ -51,7 +51,7 @@ tdw() {
     fi
     # Create the window at the terminal's size: tmux hands a later resize out
     # equally across the stacked rows, which would grow the shell past 15%
-    local size lines="" cols="" editor_pane agent_pane
+    local size lines="" cols="" agent_pane editor_pane
     local -a size_args=()
     if size=$({ stty size < /dev/tty; } 2>/dev/null) && [[ $size =~ ^[0-9]+\ [0-9]+$ ]]; then
       read -r lines cols <<<"$size"
@@ -59,10 +59,10 @@ tdw() {
       lines=${LINES:-} cols=${COLUMNS:-}
     fi
     [[ -n $lines && -n $cols && $lines -gt 0 && $cols -gt 0 ]] && size_args=(-x "$cols" -y "$lines")
-    editor_pane=$(tmux new-session -d -s "$session" -c "$root" -n "$(basename "$root")" "${size_args[@]}" -P -F '#{pane_id}')
+    agent_pane=$(tmux new-session -d -s "$session" -c "$root" -n "$(basename "$root")" "${size_args[@]}" -P -F '#{pane_id}')
     tmux set-option -t "$session" @dw_root "$root"
-    # The agent takes the right half at full height, then the shell the bottom 15% under the editor
-    agent_pane=$(tmux split-window -h -l 50% -t "$editor_pane" -c "$root" -P -F '#{pane_id}')
+    # The agent keeps the left half at full height; the editor takes the right half, with the shell on its bottom 15%
+    editor_pane=$(tmux split-window -h -l 50% -t "$agent_pane" -c "$root" -P -F '#{pane_id}')
     tmux split-window -v -l 15% -t "$editor_pane" -c "$root"
     tmux send-keys -t "$agent_pane" "$command" C-m
     tmux send-keys -t "$editor_pane" "${EDITOR:-nvim} ." C-m

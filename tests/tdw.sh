@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fixtures for the tdw workspace launcher on an isolated tmux server: one
-# window named after the project with the editor top-left over a 15% shell,
-# the agent at full height on the right half, and focus on the agent; the
+# window named after the project with the agent at full height on the left
+# half, the editor over a 15% shell on the right, and focus on the agent; the
 # three agents and their continue forms; re-attach; the root-collision guard;
 # and the usage and missing-agent refusals. Stub agents record their arguments;
 # attaching is recorded instead of performed, since the fixture has no terminal.
@@ -76,14 +76,14 @@ case_layout() {
   # active left top width height window_width window_height
   while IFS= read -r line; do
     read -r -a fields <<<"$line"
-    if ((fields[2] > 0)); then shell=("${fields[@]}"); elif ((fields[1] == 0)); then editor=("${fields[@]}"); else agent=("${fields[@]}"); fi
+    if ((fields[1] == 0)); then agent=("${fields[@]}"); elif ((fields[2] > 0)); then shell=("${fields[@]}"); else editor=("${fields[@]}"); fi
   done < <(tmux list-panes -t "=$session" -F '#{pane_active} #{pane_left} #{pane_top} #{pane_width} #{pane_height} #{window_width} #{window_height}')
   ((${#editor[@]} && ${#agent[@]} && ${#shell[@]})) || fail "could not classify the three panes"
   ((shell[5] == 200 && shell[6] == 50)) || fail "window was not created at the terminal size (${shell[5]}x${shell[6]})"
   ((agent[0] == 1)) || fail "focus did not land on the agent pane"
-  ((agent[1] == editor[3] + 1)) || fail "agent pane does not sit right of the editor"
-  (( editor[3] - agent[3] <= 1 && agent[3] - editor[3] <= 1 )) || fail "editor and agent are not split 50/50 (${editor[3]} vs ${agent[3]})"
-  ((shell[3] == editor[3])) || fail "shell does not sit under the editor at its width"
+  ((editor[1] == agent[3] + 1)) || fail "editor pane does not sit right of the agent"
+  (( editor[3] - agent[3] <= 1 && agent[3] - editor[3] <= 1 )) || fail "agent and editor are not split 50/50 (${agent[3]} vs ${editor[3]})"
+  ((shell[1] == editor[1] && shell[3] == editor[3])) || fail "shell does not sit under the editor at its width"
   ((agent[4] == agent[6])) || fail "agent pane does not take the full window height"
   ((shell[4] * 100 <= 15 * shell[6] + 100 && shell[4] * 100 >= 15 * shell[6] - 100)) || fail "shell height is not 15% (${shell[4]} of ${shell[6]})"
   ((editor[4] + shell[4] + 1 == shell[6])) || fail "editor row and shell do not fill the window height"
