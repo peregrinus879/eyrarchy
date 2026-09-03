@@ -1,22 +1,24 @@
-# Create or resume a Dev Workspace: one tmux session per project with a
-# full-width AI agent window plus an editor/shell window.
-# Layout: 1:<agent> | 2:editor+terminal ($EDITOR over a 25% shell)
-# Usage: tdw <cc|oc> [-c]   cc = Claude Code, oc = OpenCode; -c continues the
-# agent's last conversation in this project. Bare tdw re-attaches an existing
-# project session. One agent per workspace by design (single writer).
+# Create or resume a Dev Workspace: one tmux session per project holding
+# Omarchy's dev layout in one window named after the project: $EDITOR top-left,
+# the AI agent top-right (50/50 by width), a shell across the bottom 15%.
+# Focus lands on the agent.
+# Usage: tdw <cc|cx|oc> [-c]   cc = Claude Code, cx = Codex, oc = OpenCode;
+# -c continues the agent's last conversation in this project. Bare tdw
+# re-attaches an existing project session. One agent per workspace by design
+# (single writer). The agents run plain, as EyrAgents configures them.
 tdw() {
-  local agent="" window="" continue_flag="" arg
+  local agent="" continue_flag=0 arg
   for arg in "$@"; do
     case "$arg" in
-      cc | oc)
+      cc | cx | oc)
         if [[ -n $agent ]]; then
-          echo "tdw: choose one agent, cc or oc"
+          echo "tdw: choose one agent, cc, cx, or oc"
           return 1
         fi
-        if [[ $arg == cc ]]; then agent="claude" window="claude-code"; else agent="opencode" window="opencode"; fi
+        agent=$arg
         ;;
-      -c) continue_flag=" -c" ;;
-      *) echo "Usage: tdw <cc|oc> [-c]"; return 1 ;;
+      -c) continue_flag=1 ;;
+      *) echo "Usage: tdw <cc|cx|oc> [-c]"; return 1 ;;
     esac
   done
 
@@ -26,34 +28,39 @@ tdw() {
   session=$(basename "$root" | tr '.:' '--')
 
   if tmux has-session -t "=$session" 2>/dev/null; then
-    existing_root=$(tmux show-option -t "=$session" -qv @dw_root)
+    existing_root=$(tmux show-option -t "$session" -qv @dw_root)
     if [[ -n $existing_root && $existing_root != "$root" ]]; then
       echo "tmux session '$session' belongs to $existing_root; kill it or attach manually."
       return 1
     fi
-    [[ -n $agent || -n $continue_flag ]] && echo "tdw: session exists, arguments ignored"
+    [[ -n $agent || $continue_flag == 1 ]] && echo "tdw: session exists, arguments ignored"
   else
     if [[ -z $agent ]]; then
-      echo "Usage: tdw <cc|oc> [-c]"
+      echo "Usage: tdw <cc|cx|oc> [-c]"
       return 1
     fi
-    if ! type -P "$agent" > /dev/null 2>&1; then
-      echo "tdw: required agent '$agent' is not installed"
+    local binary command
+    case "$agent" in
+      cc) binary=claude; command=claude; ((continue_flag)) && command="claude -c" ;;
+      cx) binary=codex; command=codex; ((continue_flag)) && command="codex resume --last" ;;
+      oc) binary=opencode; command=opencode; ((continue_flag)) && command="opencode -c" ;;
+    esac
+    if ! type -P "$binary" > /dev/null 2>&1; then
+      echo "tdw: required agent '$binary' is not installed"
       return 1
     fi
-    local editor_pane
-    tmux new-session -d -s "$session" -c "$root" -n "$window"
+    local editor_pane agent_pane
+    editor_pane=$(tmux new-session -d -s "$session" -c "$root" -n "$(basename "$root")" -P -F '#{pane_id}')
     tmux set-option -t "$session" @dw_root "$root"
-    editor_pane=$(tmux new-window -t "=$session:" -n editor+terminal -c "$root" -P -F '#{pane_id}')
-    # Shell at bottom 25%; the split leaves the new bottom pane focused on purpose,
-    # so entering the window lands on the terminal ($editor_pane stays the top pane)
-    tmux split-window -v -l 25% -t "$editor_pane" -c "$root"
-    tmux send-keys -t "=$session:$window" "$agent$continue_flag" C-m
-    tmux send-keys -t "$editor_pane" "$EDITOR ." C-m
-    tmux select-window -t "=$session:$window"
+    # Shell across the bottom 15%, then the agent on the right half of the editor row
+    tmux split-window -v -l 15% -t "$editor_pane" -c "$root"
+    agent_pane=$(tmux split-window -h -l 50% -t "$editor_pane" -c "$root" -P -F '#{pane_id}')
+    tmux send-keys -t "$agent_pane" "$command" C-m
+    tmux send-keys -t "$editor_pane" "${EDITOR:-nvim} ." C-m
+    tmux select-pane -t "$agent_pane"
   fi
 
-  if [[ -n $TMUX ]]; then
+  if [[ -n ${TMUX:-} ]]; then
     tmux switch-client -t "=$session"
   else
     tmux attach-session -t "=$session"

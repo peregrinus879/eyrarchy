@@ -1,27 +1,29 @@
-# Create or focus a Herdr Dev Workspace: one herdr workspace per project with a
-# full-width AI agent tab plus an editor/shell tab.
-# Layout: 1:<agent> | 2:editor+terminal ($EDITOR over a 25% shell)
-# Usage: hdw <cc|oc> [-c]   cc = Claude Code, oc = OpenCode; -c continues the
-# agent's last conversation in this project. Bare hdw refocuses an existing
-# project workspace. One agent per workspace by design (single writer).
+# Create or focus a Herdr Dev Workspace: one herdr workspace per project holding
+# Omarchy's dev layout in one tab named after the project: $EDITOR top-left,
+# the AI agent top-right (50/50 by width), a shell across the bottom 15%.
+# Focus lands on the agent.
+# Usage: hdw <cc|cx|oc> [-c]   cc = Claude Code, cx = Codex, oc = OpenCode;
+# -c continues the agent's last conversation in this project. Bare hdw
+# refocuses an existing project workspace. One agent per workspace by design
+# (single writer). The agents run plain, as EyrAgents configures them.
 # Herdr socket commands need a running server and do not auto-start one; hdw
 # starts the server headless when it is down, so one invocation works from a
 # cold boot. If the headless start fails, hdw attaches plain herdr with a hint
 # to rerun hdw inside (documented two-step fallback).
 hdw() {
-  local agent="" tab_label="" continue_flag="" arg
+  local agent="" continue_flag=0 arg
   for arg in "$@"; do
     case "$arg" in
-      cc | oc)
+      cc | cx | oc)
         if [[ -n $agent ]]; then
-          echo "hdw: choose one agent, cc or oc"
+          echo "hdw: choose one agent, cc, cx, or oc"
           return 1
         fi
-        if [[ $arg == cc ]]; then agent="claude" tab_label="claude-code"; else agent="opencode" tab_label="opencode"; fi
+        agent=$arg
         ;;
-      -c) continue_flag=" -c" ;;
+      -c) continue_flag=1 ;;
       *)
-        echo "Usage: hdw <cc|oc> [-c]"
+        echo "Usage: hdw <cc|cx|oc> [-c]"
         return 1
         ;;
     esac
@@ -62,25 +64,35 @@ hdw() {
       return 1
     fi
     [[ -z $recorded_root ]] && echo "hdw: focusing '$ws_label', a workspace hdw did not create"
-    [[ -n $agent || -n $continue_flag ]] && echo "hdw: workspace exists, arguments ignored"
+    [[ -n $agent || $continue_flag == 1 ]] && echo "hdw: workspace exists, arguments ignored"
     herdr workspace focus "$ws_id" >/dev/null
   else
     if [[ -z $agent ]]; then
-      echo "Usage: hdw <cc|oc> [-c]"
+      echo "Usage: hdw <cc|cx|oc> [-c]"
       return 1
     fi
-    local created agent_pane agent_tab editor_pane
+    local binary command
+    case "$agent" in
+      cc) binary=claude; command=claude; ((continue_flag)) && command="claude -c" ;;
+      cx) binary=codex; command=codex; ((continue_flag)) && command="codex resume --last" ;;
+      oc) binary=opencode; command=opencode; ((continue_flag)) && command="opencode -c" ;;
+    esac
+    if ! type -P "$binary" > /dev/null 2>&1; then
+      echo "hdw: required agent '$binary' is not installed"
+      return 1
+    fi
+    local created editor_pane tab_id agent_pane
     created=$(herdr workspace create --cwd "$root" --label "$ws_label" --no-focus) || return 1
     ws_id=$(jq -r '.result.workspace.workspace_id' <<<"$created")
-    agent_pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
-    agent_tab=$(jq -r '.result.tab.tab_id' <<<"$created")
-    herdr tab rename "$agent_tab" "$tab_label" >/dev/null
-    editor_pane=$(herdr tab create --workspace "$ws_id" --cwd "$root" --label editor+terminal --no-focus |
-      jq -r '.result.root_pane.pane_id')
-    # Shell at bottom 25%; the editor keeps the top pane, like the tmux layout
-    herdr pane split "$editor_pane" --direction down --ratio 0.75 --cwd "$root" --no-focus >/dev/null
-    herdr pane run "$agent_pane" "$agent$continue_flag" >/dev/null
-    herdr pane run "$editor_pane" "$EDITOR ." >/dev/null
+    editor_pane=$(jq -r '.result.root_pane.pane_id' <<<"$created")
+    tab_id=$(jq -r '.result.tab.tab_id' <<<"$created")
+    herdr tab rename "$tab_id" "$(basename "$root")" >/dev/null
+    # Shell across the bottom 15%, then the agent on the right half of the editor row, focused
+    herdr pane split "$editor_pane" --direction down --ratio 0.85 --cwd "$root" --no-focus >/dev/null
+    agent_pane=$(herdr pane split "$editor_pane" --direction right --ratio 0.5 --cwd "$root" --focus |
+      jq -r '.result.pane.pane_id')
+    herdr pane run "$agent_pane" "$command" >/dev/null
+    herdr pane run "$editor_pane" "${EDITOR:-nvim} ." >/dev/null
     mkdir -p "$state_dir"
     {
       [[ -f $state_file ]] && awk -F '\t' -v l="$ws_label" '$1 != l' "$state_file"
@@ -90,7 +102,7 @@ hdw() {
   fi
 
   # Inside herdr the focus switch above is the whole job; outside, attach
-  if [[ -z $HERDR_PANE_ID ]]; then
+  if [[ -z ${HERDR_PANE_ID:-} ]]; then
     herdr
   fi
 }

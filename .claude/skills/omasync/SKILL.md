@@ -29,7 +29,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 1. Run `make refs` first, every time: `scripts/update-references.sh` clones what `references.txt` lists and the quarry lacks, resolves each listed clone to its current GitHub location and repoints a moved remote, checks out the upstream default branch and fast-forwards it, and removes clean clones no family repository lists. Fix anything it reports before comparing, and when it reports a repointed origin, update that URL in `references.txt` and `DEVIATIONS.md` (Reference Sources). When this repo starts or stops using a reference, change `references.txt`; the clones follow. Updating the quarry is this skill's job, never H's preparation.
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
-   - the `claude` alias (`--effort max`) against `default/bash/aliases`: every Omarchy launcher that runs `claude` (`cx`, `ix`, `icx`) must still compose with it through alias expansion
+   - the `unalias` line against `default/bash/aliases`: it must name exactly Omarchy's AI launch aliases (`c`, `cx`, `cy`, `ic`, `ix`, and `icx` today); a new upstream launch alias joins the line and a renamed one leaves it
    - the `OPENCODE_DISABLE_EXTERNAL_SKILLS` and `OPENCODE_ENABLE_EXA` exports stay additive unless Omarchy starts setting `OPENCODE_*` variables
    - `y()` is additive (Yazi is not in Omarchy)
    - the sourced `tdw` and `hdw` twins against `default/bash/fns/tmux` and `default/bash/fns/herdr`: they stay additive alongside `tdl`/`tds` and `hdl`/`hds`, and a change to either lands in EyrWSL in the same session (`make twins`)
@@ -68,7 +68,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 - Fetch changeable upstream and package facts at maintenance time instead of caching versions in this skill
 - Do not copy Omarchy default behavior into this repo if Omarchy already manages it; the deviation policy extends to skills, so defer to the shipped `omarchy` skill rather than duplicating its content here
 - Load the shipped `omarchy` skill before editing any Hyprland or desktop config; keep only repo-specific rules in this file
-- Keep the Bash overrides minimal: source Omarchy defaults, only override what needs to change; the `claude` alias, the OpenCode exports, `y()`, and the sourced `tdw` and `hdw` twins are the whole override set, and the twins change only together with EyrWSL
+- Keep the Bash overrides minimal: source Omarchy defaults, only override what needs to change; the AI alias removals, the OpenCode exports, `y()`, and the sourced `tdw` and `hdw` twins are the whole override set, and the twins change only together with EyrWSL
 - Keep Yazi config standalone since Yazi is not part of Omarchy
 - Package removals: the pacman dependency graph is necessary but not sufficient; also check runtime plugin loading (`qt5-wayland`/`qt6-wayland` style), tools exec'd by Omarchy scripts (`grep -r` the `/usr/share/omarchy` tree), and .NET framework targets (`*.runtimeconfig.json` against installed runtimes)
 - `qt6-wayland` reads as a pacman orphan but carries Quickshell and every Qt6 app at runtime; never remove `pacman -Qdtq` output as a batch

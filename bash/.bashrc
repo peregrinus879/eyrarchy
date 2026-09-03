@@ -14,8 +14,10 @@ source "$OMARCHY_PATH/default/bash/rc"
 export OPENCODE_DISABLE_EXTERNAL_SKILLS=1
 export OPENCODE_ENABLE_EXA=1
 
-# Launch Claude Code with maximum effort; interactive aliases (cx, tdl targets) inherit via alias expansion
-alias claude='claude --effort max'
+# The AI tools run as EyrAgents configures them: drop Omarchy's launch aliases,
+# which set permission modes, approval flags, and tdl targets EyrAgents and the
+# workspace launchers own
+unalias c cx cy ic ix icx 2> /dev/null
 
 # Yazi cd-on-exit (Yazi is not part of Omarchy)
 y() {

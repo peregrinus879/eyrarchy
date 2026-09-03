@@ -16,7 +16,7 @@ jobs:
       - name: Install prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends git lua5.4 python3 shellcheck stow
+          sudo apt-get install -y --no-install-recommends git lua5.4 python3 shellcheck stow tmux
           command -v luac > /dev/null || sudo ln -s "$(command -v luac5.4)" /usr/local/bin/luac
       - run: make lint
       - run: make check

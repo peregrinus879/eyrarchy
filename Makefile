@@ -19,7 +19,8 @@ TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   bash/.config/bash/functions/hdw \
   yazi/.config/yazi/yazi.toml \
   scripts/update-references.sh \
-  tests/update-references.sh
+  tests/update-references.sh \
+  tests/tdw.sh
 
 BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*)
 LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.lua)
@@ -84,7 +85,7 @@ lint:
 # fixture suites. Needs no Omarchy host, stowed links, or Hyprland session.
 # Fail closed: a missing verifier binary must fail the run, not skip a check.
 check:
-	@for tool in luac python3 git stow; do \
+	@for tool in luac python3 git stow tmux; do \
 	  command -v "$$tool" > /dev/null || { echo "FAIL: required verifier '$$tool' is missing"; exit 1; }; \
 	done
 	@fail=0; \

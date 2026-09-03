@@ -46,7 +46,7 @@ yazi/   Yazi file manager config (yazi.toml, no theme)
 Key ownership rules:
 
 - Omarchy manages all defaults, themes, and desktop configs
-- `bash/` owns `~/.bashrc`, sources Omarchy defaults, and adds personal overrides below, including the interactive OpenCode skill-isolation and search environment; EyrAgents owns the OpenCode configuration itself. Claude Code launches use the supported maximum effort, `--effort max`. `tdw` and `hdw` are byte-identical twins with EyrWSL.
+- `bash/` owns `~/.bashrc`, sources Omarchy defaults, and adds personal overrides below, including the interactive OpenCode skill-isolation and search environment; EyrAgents owns the OpenCode configuration itself. The AI tools run as EyrAgents configures them; Omarchy's launch aliases are unaliased. `tdw` and `hdw` are byte-identical twins with EyrWSL.
 - `yazi/` is purely additive since Yazi is not part of Omarchy
 - `nvim/` is purely additive plugin specs on top of the `omarchy-nvim` base; the vault is expected at `~/Projects/vault` (override with `OBSIDIAN_VAULT`)
 - `hypr/` owns `~/.config/hypr/bindings.lua`, `~/.config/hypr/monitors.lua`, `~/.config/hypr/input.lua`, and `~/.config/hypr/looknfeel.lua`: personal overrides only, loaded after the Omarchy defaults; all other Hyprland config is Omarchy-owned and untracked
@@ -154,8 +154,9 @@ After stowing or changing owned packages:
 - Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages: `check` and `twins`, then the stowed symlinks (compared by resolved path), every managed parent being a real directory, the Git identity (it must resolve to a GitHub no-reply address; the value is not printed), every `hl.unbind` target and personal chord in `bindings.lua` against the installed Omarchy defaults, and Hyprland config errors.
 - Start a fresh shell and confirm `printenv OPENCODE_DISABLE_EXTERNAL_SKILLS` and `printenv OPENCODE_ENABLE_EXA` each print `1`; non-interactive OpenCode launchers must supply both variables themselves.
 - Start a fresh shell and confirm `type y` shows the Yazi cd-on-exit function.
-- Confirm `type tdw` shows the tmux workspace function; from a project directory, `tdw cc` or `tdw oc` opens its session (`-c` continues that agent's last conversation; bare `tdw` re-attaches an existing session). Creating a session fails before changing tmux state when the selected agent is unavailable.
-- Confirm `type hdw` shows the herdr workspace function; from a project directory, `hdw cc` or `hdw oc` opens its workspace (bare `hdw` refocuses; the herdr server is started headless when down, and if that start fails `hdw` attaches plain herdr, rerun it inside).
+- Start a fresh shell and confirm `alias claude c cx cy ic ix icx` reports no alias for any of them: the AI tools run as EyrAgents configures them.
+- Confirm `type tdw` shows the tmux workspace function; from a project directory, `tdw cc`, `tdw cx`, or `tdw oc` opens its session in one window with the agent focused (`-c` continues that agent's last conversation; bare `tdw` re-attaches an existing session). Creating a session fails before changing tmux state when the selected agent is unavailable.
+- Confirm `type hdw` shows the herdr workspace function; from a project directory, `hdw cc`, `hdw cx`, or `hdw oc` opens its workspace with the agent focused (bare `hdw` refocuses; the herdr server is started headless when down, and if that start fails `hdw` attaches plain herdr, rerun it inside).
 - `hl.env` values in the tracked hypr files reach the compositor on reload but reach uwsm-launched clients only at session start; after first adopting the hypr package on a running session, log out and back in once.
 - Run `yazi` and confirm the layout ratio and sort order match the config.
 - Open a vault note in Neovim and confirm obsidian.nvim loads (`<leader>oo` opens the note switcher).
