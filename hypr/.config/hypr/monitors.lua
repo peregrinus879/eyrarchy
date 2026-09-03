@@ -15,11 +15,3 @@ hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "auto", scale 
 
 -- Portrait/rotated secondary monitor (transform: 1 = 90°, 3 = 270°).
 -- hl.monitor({ output = "DP-2", mode = "preferred", position = "auto", scale = 1, transform = 1 })
-
--- omarchy 4.0.0's o.shell_succeeds() cannot read child exit statuses inside
--- Hyprland (basecamp/omarchy#6914), so default/hypr/nvidia.lua never sets the
--- NVIDIA client env on this GSP-class GPU. Remove when the packaged omarchy
--- ships the upstream fix (0965ac2e4f, first release after v4.0.0).
-hl.env("NVD_BACKEND", "direct")
-hl.env("LIBVA_DRIVER_NAME", "nvidia")
-hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
