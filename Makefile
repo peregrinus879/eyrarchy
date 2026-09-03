@@ -24,7 +24,7 @@ LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.
 TOML_FILES := yazi/.config/yazi/yazi.toml
 OMARCHY_HYPR := /usr/share/omarchy/default/hypr
 
-.PHONY: help stow unstow dry-run restow lint check twins verify clean recover
+.PHONY: help stow unstow dry-run restow lint check twins verify clean recover refs
 
 # recover's prerequisites (clean, restow) must run in order, never concurrently.
 .NOTPARALLEL:
@@ -58,6 +58,7 @@ help:
 	@echo "  verify    check and twins, then host checks: links, real parents, Git identity, Hyprland unbind chords and config errors"
 	@echo "  clean     Guarded stow preparation: leftover folds, dangling clone links, and clobber artifacts only (scripts/prepare-stow.sh)"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
+	@echo "  refs      Fast-forward the reference clones under ~/Projects/quarry to their current upstream default branches"
 
 stow:
 	$(STOW) -v $(PACKAGES)
@@ -160,3 +161,8 @@ clean:
 	@EYRARCHY_PACKAGES='$(PACKAGES)' bash scripts/prepare-stow.sh
 
 recover: clean restow
+
+# omasync step 1. Repoints a moved GitHub remote, then fast-forwards each clone
+# to its upstream default branch; a clone it cannot update fails the run.
+refs:
+	@bash scripts/update-references.sh

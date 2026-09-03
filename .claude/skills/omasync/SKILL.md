@@ -11,7 +11,8 @@ Source configs from the installed Omarchy defaults, the reference repos, and off
 
 Local reference clones live under `~/Projects/quarry/`:
 
-- `omarchy/` - main repo for bash, tmux, and general Omarchy defaults; tracks the upstream default branch, which upstream moves between releases (re-resolve with `git remote set-head origin -a`, then match the checkout), so pin release comparisons to the installed version's tag (`git show <installed-tag>:<path>`)
+- `omarchy/` - main repo for bash, tmux, and general Omarchy defaults; `make refs` keeps it on the upstream default branch, which upstream moves between releases, so pin release comparisons to the installed version's tag (`git show <installed-tag>:<path>`)
+- `omarchy-pkgs/` - Omarchy's package build recipes, for package version and dependency questions
 - `obsidian.nvim/` - obsidian.nvim upstream for the vault plugin spec
 
 The installed defaults the machine actually runs live under `/usr/share/omarchy` (package-backed). The shipped `omarchy` agent skill (auto-discovered via `~/.claude/skills/omarchy`; package copy at `/usr/share/omarchy/default/agents/skills/omarchy`) is upstream-owned, refreshed with Omarchy updates, and authoritative for desktop-config editing; never fork it into this repo. Upstream URLs, official docs, and descriptions live in `DEVIATIONS.md` (Reference Sources). Unresolved decisions, deferred work, and dated evidence live in `docs/maintenance.md`; sibling coordination lives at `~/Projects/eyrie/eyragents/docs/maintenance.md` and `~/Projects/eyrie/eyrwsl/AGENTS.md`.
@@ -25,7 +26,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 
 ## Workflow
 
-1. Update the reference clones: for each repo under `~/Projects/quarry/`, run `git remote set-head origin -a`, match the checkout to the resolved default branch, `git fetch --prune --tags && git pull --ff-only`, and confirm `HEAD` equals `origin/<default>`.
+1. Run `make refs` first, every time: `scripts/update-references.sh` resolves each clone under `~/Projects/quarry/` to its current GitHub location, repoints a moved remote, checks out the upstream default branch, and fast-forwards it. Fix any clone it reports before comparing anything. Updating the clones is this skill's job, never H's preparation.
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
    - the `claude` alias (`--effort max`) against `default/bash/aliases`: every Omarchy launcher that runs `claude` (`cx`, `ix`, `icx`) must still compose with it through alias expansion

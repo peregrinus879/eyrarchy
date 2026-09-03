@@ -171,6 +171,7 @@ A repo-root `Makefile` keeps the package list in one place and wraps the routine
 - `make verify` - `check` and `twins`, then the host checks listed under Verify
 - `make clean` - guarded stow preparation (`scripts/prepare-stow.sh`); leftover folded links, dangling clone links, and clobber artifacts only, aborts before removing anything otherwise
 - `make recover` - the Recovery steps after `omarchy-reinstall-configs` (clean + restow)
+- `make refs` - fast-forward the reference clones under `~/Projects/quarry` to their upstream default branches, repointing moved GitHub remotes (`/omasync` step 1)
 
 `make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only. `.github/workflows/test.yml` runs `make lint`, `make check`, and `make twins` on every push to `main` and every pull request.
 
