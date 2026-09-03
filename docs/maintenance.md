@@ -1,23 +1,21 @@
 # Maintenance Ledger - EyrArcHy
 
-Read this file before package removals, Omarchy updates or refreshes, work on a deferred item, or cross-repo coordination. Current operational policy stays in `AGENTS.md`; this ledger carries dated findings, known limitations, and deferred items. It records repo decisions and behavior official docs do not state; doc-derivable facts (defaults, version gates, upstream status) are fetched at change time, not cached here.
+Unresolved decisions, deferred work, active limitations, and the dated evidence behind them. Durable rules live in `AGENTS.md`, `DEVIATIONS.md`, a skill, a script header, or a test; remove an item here once its rule has moved there.
 
-## Known Limitations
+## Active Limitations
 
-- `omarchy-reinstall-configs` (on quattro via `cp -af /etc/skel/. ~/`) and `omarchy-refresh-config` copy defaults with no symlink awareness, writing through stow symlinks into this repo's files; if either runs, `git restore` the clobbered repo files first, then run `make recover`.
-- `omarchy-refresh-hyprland` refreshes every `~/.config/hypr` Lua file including the stowed ones; the `cp -f` writes the shipped default through each symlink into the repo working tree (the links survive, a timestamped `.bak` of the personal content is left beside each). Recovery is `git restore hypr/.config/hypr/`. Verified against the installed 4.0.0 scripts on 2026-08-15.
-- Stow tree-folds `~/.config/yazi` into a directory symlink pointing at the repo, so anything written there lands in the repo working tree; folding is the accepted repo-family stow convention (do not add `--no-folding`).
+- Omarchy's config refresh and reset scripts copy defaults with no symlink awareness (checked against the installed 4.0.2-1 scripts on 2026-09-03; recheck at each omarchy package update): `omarchy-refresh-config`, and `omarchy-refresh-hyprland` through it, `cp -f` the shipped default through each stowed link into the repo working tree, leaving the link in place and a timestamped `.bak` of the personal content beside it; `omarchy-reinstall-configs` replays `/etc/skel` over `$HOME` with `cp -af`. After either, `git restore` the clobbered package files, then run `make recover`.
 
-## Deferred Items
+## Open Decisions
 
-- remove the NVIDIA client env trio from `hypr/.config/hypr/monitors.lua` once the packaged omarchy ships upstream fix `0965ac2e4f` (the `o.shell_succeeds()` ECHILD fix for [basecamp/omarchy#6914](https://github.com/basecamp/omarchy/issues/6914), merged after v4.0.0); the fix is absent from the installed omarchy 4.0.0-1, verified 2026-08-18.
-- pre-quattro leftovers on this host are inert and uncleaned: the `~/.config/hypr/*.conf` set (including the orphaned NVIDIA `envs.conf`), the legacy `~/.local/share/omarchy` tree, and the quattro-upgrade `.bak` trees; the active Lua chain reads none of them (verified 2026-08-18), and cleanup is H's call, outside repo ownership.
-- EyrAgents quattro absorption session: record diagnose-crash ownership (see the migration item below); re-check the spar bridges' 30-second preflights against cold mise-wrapper first-call installs; add the effort-pin cross-reference (this repo's interactive `claude --effort max` alias overrides its tracked `effortLevel xhigh` pin).
-- upstream `tdl` ends with `select-pane -t "$opencode_pane"` on a variable it never sets (cosmetic focus regression), verified still present at quattro `f32ebbdb` in `default/bash/fns/tmux` on 2026-08-18.
-- close or rework basecamp/omarchy#5256 (the `tdl` passthrough-guard PR from this account); no local guard is tracked (the guard approach is ineffective).
-- watch [basecamp/omarchy#7327](https://github.com/basecamp/omarchy/issues/7327) (from this account, 2026-08-18): the upgrade-to-quattro qt6-wayland install-reason gap; this host is already repaired (`pacman -D --asexplicit qt6-wayland`, 2026-08-18), so drop this line when the issue closes.
-- watch the tree-folded `~/.config/yazi`: the first `ya pkg` install writes `plugins/` and `package.toml` into the repo working tree; decide then whether to track them (the EyrAgents opencode-deps pattern) or gitignore them (the EyrWSL git-identity pattern).
-- watch `~/.local/bin` on quattro: every `omarchy-refresh-applications` runs `rm -f` on the 13 managed CLI names (claude, codex, opencode, crush, gemini, gh, copilot, playwright, pi, omp, grok, ghui, hunk) and rewrites them as lazy mise wrappers. The EyrAgents spar bins (`spar-claude`, `spar-codex`, `spar-payload-scan`) are not in the list and survive.
-- quattro migrations and agent skills: migration 1786539345 symlinks `diagnose-crash` into four dirs (`~/.agents/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.pi/agent/skills`) and enables `omarchy-crash-watch.service`; migration 1786098807 relinks the `omarchy` skill into the same four. No stow collision (EyrAgents keeps those parents as real directories); OpenCode cannot see diagnose-crash by design (its `skills.paths` restores only the omarchy skill). The ownership decision belongs to EyrAgents.
-- watch three upstream changes pending the first omarchy package update past 4.0.0-1, all verified merged on quattro as of 2026-08-18: `cx` becomes `claude --permission-mode auto` (`dd9dee41`; the interactive `claude --effort max` alias composes, but bypass becomes auto-review, re-evaluate the pairing then); the mise wrappers gain `--quiet` (`1c3da949`; until the update reruns `omarchy-refresh-applications`, wrapped CLIs can emit a stray `tools:` stdout line on version resolution); upstream is planning a "dots" user-config preservation and sync feature (`022f6993`, plans only), which could overlap this repo's stow approach when it ships.
-- later iteration: `tests/` fixtures and executable config contracts in the EyrAgents style (`hl.unbind` chords asserted against current defaults, fake-home clean/restow fixtures); `make verify` carries the `yazi.toml` TOML validity check inline.
+- Whether `/omasync` keeps its "present proposed changes before editing" rule as a deliberate exception to shared guidance, under which an implementation request authorizes edits. Upstream sync is judgment-heavy and touches many files, which argues for keeping the rule with its reason stated in the skill.
+- Whether to clean the inert leftovers on this host: the pre-quattro `~/.config/hypr/*.conf` set (including the orphaned NVIDIA `envs.conf`), the legacy `~/.local/share/omarchy` tree, the `*.omarchy-upgrade-to-quattro.*.bak` files, and the 4.0.0 mise wrappers in `~/.local/bin` (dated 2026-08-15, without the `--quiet` that 4.0.2's `omarchy-mise-install` writes; `omarchy-refresh-applications` rewrites them). The active Lua chain reads none of the config leftovers, and the mise install directories precede `~/.local/bin` on `PATH`; cleanup is outside repo ownership.
+
+## Deferred Work
+
+- Watch basecamp/omarchy#7327 (qt6-wayland install-reason gap from the quattro upgrade, filed from this account, open as of 2026-09-03); this host is repaired (`pacman -D --asexplicit qt6-wayland`), so drop this line when the issue closes.
+- Upstream watches, rechecked at each omarchy package update (last 4.0.2-1, 2026-09-03): `tdl` still ends with `select-pane -t "$opencode_pane"` on a variable it never sets (cosmetic focus regression; the passthrough-guard PR basecamp/omarchy#5256 from this account was closed unmerged on 2026-08-26 and no local guard is tracked); the planned "dots" user-config preservation feature (`022f6993`, plans only) could overlap this repo's stow approach when it ships.
+
+## Revalidation Triggers
+
+- Each omarchy package update (`pacman -Q omarchy`): rerun `/omasync`, recheck every item above that names a version, then run `make verify`.
