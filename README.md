@@ -179,7 +179,7 @@ Periodically, review the local reference repos and official docs for upstream ch
 
 ## Related Repos
 
-Upstream comparison runs through the `/omasync` skill, which carries the local reference clone paths. Upstream URLs and official docs live in [DEVIATIONS.md](DEVIATIONS.md) (Reference Sources).
+Upstream comparison runs through the `/omasync` skill; `make refs` keeps the reference clones listed in `references.txt` current. Upstream URLs and official docs live in [DEVIATIONS.md](DEVIATIONS.md) (Reference Sources).
 
 ## Credits
 

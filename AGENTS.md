@@ -10,7 +10,7 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 
 ## Invariants
 
-- Target machine: Omarchy; run `stow`, `clean`, `recover`, and `verify` only on the Omarchy host. `lint`, `check`, and `twins` run anywhere.
+- Target machine: Omarchy; run `stow`, `clean`, `recover`, and `verify` only on the Omarchy host. `lint`, `check`, `twins`, and `refs` run anywhere.
 - Because the packages are live configuration on the stowed host, an edit to a stowed file here is active for the next shell, Hyprland reload (Hyprland reloads on save), Neovim session, or Yazi launch before any commit; work on this repository only in a session H is watching.
 - Stow runs with `--no-folding`, so every managed parent under `$HOME` is a real directory and only leaf files are links; generated host state therefore never reaches a package source. `make clean` removes only leftover folded links, dangling links whose text names a package entry this repository has, and regular files at owned paths (Omarchy clobber artifacts); `make verify` fails on a folded managed directory.
 - When editing sibling dotfiles repos, use identical wording for shared concepts; only repo-specific values (scope, package lists, invariants) differ.

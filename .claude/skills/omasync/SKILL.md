@@ -65,6 +65,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 - Omarchy, official docs, official package docs, and `DEVIATIONS.md` are the source of truth for default behavior and intentional differences
 - Always check all relevant sources, not just one
 - Never assume a difference is intentional without verifying it is documented in `DEVIATIONS.md`
+- Fetch changeable upstream and package facts at maintenance time instead of caching versions in this skill
 - Do not copy Omarchy default behavior into this repo if Omarchy already manages it; the deviation policy extends to skills, so defer to the shipped `omarchy` skill rather than duplicating its content here
 - Load the shipped `omarchy` skill before editing any Hyprland or desktop config; keep only repo-specific rules in this file
 - Keep the Bash overrides minimal: source Omarchy defaults, only override what needs to change; the `claude` alias, the OpenCode exports, `y()`, and the sourced `tdw` and `hdw` twins are the whole override set, and the twins change only together with EyrWSL

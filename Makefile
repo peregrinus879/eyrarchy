@@ -1,5 +1,5 @@
 # Maintenance automation for EyrArcHy. Stow, clean, recover, and verify run
-# from the repo root on the Omarchy machine; lint, check, and twins run
+# from the repo root on the Omarchy machine; lint, check, twins, and refs run
 # anywhere, including CI. The package list here is the single source of truth
 # for the stow command sets and for scripts/prepare-stow.sh.
 # Stow runs without directory folding so every managed parent under $HOME stays
