@@ -1,6 +1,6 @@
 # AGENTS.md - EyrArcHy
 
-Personal [Omarchy](https://github.com/basecamp/omarchy) dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/): targeted personal deviations stowed on top of the Omarchy desktop (Bash overrides and workspace launchers in `bash/`, Hyprland personal overrides in `hypr/`, additive Neovim vault-workflow plugin specs in `nvim/`, Yazi config in `yazi/`). Omarchy, official docs, official package docs, and `DEVIATIONS.md` are the source of truth for default behavior and intentional differences; ownership boundaries live in `DEVIATIONS.md` (Deviation Policy and Out Of Scope).
+Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/): targeted personal deviations stowed on top of the Omarchy desktop (Bash overrides and workspace launchers in `bash/`, Hyprland personal overrides in `hypr/`, additive Neovim vault-workflow plugin specs in `nvim/`, Yazi config in `yazi/`). Omarchy, official docs, official package docs, and `DEVIATIONS.md` are the source of truth for default behavior and intentional differences; ownership boundaries live in `DEVIATIONS.md` (Deviation Policy and Out Of Scope).
 
 ## Load Map
 
@@ -25,7 +25,7 @@ Personal [Omarchy](https://github.com/basecamp/omarchy) dotfiles managed with [G
 ## Post-Change Verification
 
 - Run `make lint` and `make check` after any change; CI runs both on every push to `main` and every pull request, and host-bound checks never run in CI.
-- Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages.
+- Run `make restow` and then `make verify` from the repo root on the Omarchy host after changing owned packages; deploying and verifying are the agent's steps (shared guidance), never left to H.
 - Start a fresh shell and Neovim session after structural changes.
 - The full human checklist lives in `README.md` (Verify and Maintenance).
 

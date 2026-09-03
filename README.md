@@ -1,6 +1,6 @@
 # EyrArcHy
 
-Personal [Omarchy](https://github.com/basecamp/omarchy) dotfiles, managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles, managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
 EyrArcHy carries standalone personal customizations for the Omarchy desktop. Omarchy manages its own defaults, themes, and desktop configs. This repo tracks only targeted personal deviations applied via GNU Stow.
 
@@ -26,7 +26,7 @@ Local clones live side by side under `~/Projects/eyrie/`.
 
 ## Stack
 
-- **Base**: [Omarchy](https://github.com/basecamp/omarchy)
+- **Base**: [Omarchy](https://github.com/omacom/omarchy)
 - **Bash**: Personal alias, function, and OpenCode host-environment overrides on top of Omarchy defaults
 - **Editor**: [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) and [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) plugin specs on the `omarchy-nvim` base
 - **File Manager**: [Yazi](https://github.com/sxyazi/yazi) (not part of Omarchy)
@@ -183,7 +183,7 @@ Upstream comparison runs through the `/omasync` skill, which carries the local r
 
 ## Credits
 
-Personal customizations on top of [Omarchy](https://github.com/basecamp/omarchy). See [DEVIATIONS.md](DEVIATIONS.md) for intentional differences and boundary definitions.
+Personal customizations on top of [Omarchy](https://github.com/omacom/omarchy). See [DEVIATIONS.md](DEVIATIONS.md) for intentional differences and boundary definitions.
 
 ## License
 

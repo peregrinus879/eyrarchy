@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document records the intentional differences carried by EyrArcHy relative to [Omarchy](https://github.com/basecamp/omarchy) defaults, and defines the boundary between personal desktop customizations and Omarchy-managed behavior.
+This document records the intentional differences carried by EyrArcHy relative to [Omarchy](https://github.com/omacom/omarchy) defaults, and defines the boundary between personal desktop customizations and Omarchy-managed behavior.
 
 Omarchy is the upstream reference. This repo carries only targeted personal deviations applied via GNU Stow.
 
@@ -20,7 +20,7 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 
 ## Reference Sources
 
-- [basecamp/omarchy](https://github.com/basecamp/omarchy) - main Omarchy repo for defaults, themes, and desktop configs
+- [omacom/omarchy](https://github.com/omacom/omarchy) - main Omarchy repo for defaults, themes, and desktop configs
 - [The Omarchy Manual](https://learn.omacom.io/2/the-omarchy-manual) - setup guides, keybindings, workflows
 - [obsidian-nvim/obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) - upstream for the vault plugin spec
 - [MeanderingProgrammer/render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) - upstream for the markdown rendering spec
