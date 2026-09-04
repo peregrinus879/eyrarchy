@@ -18,7 +18,7 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 - Omarchy must be installed and functional before applying these dotfiles; Yazi is installed separately (`sudo pacman -S yazi`).
 - The vault is expected at `~/Projects/vault` (override with `OBSIDIAN_VAULT`) for the obsidian.nvim workflow.
 - Git identity lives in the untracked per-host `~/.config/git/config.local`; `make verify` asserts that it resolves to a GitHub no-reply address without printing it.
-- Interactive Bash exports `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` and `OPENCODE_ENABLE_EXA=1` so terminal-launched OpenCode uses its managed skills and exposes web search. EyrAgents owns OpenCode configuration; this repo owns the Omarchy host environment. Non-interactive launchers supply the same variables explicitly.
+- Interactive Bash exports `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` and `OPENCODE_ENABLE_EXA=1` so terminal-launched OpenCode skips the Claude Code skill copies, reads `.agents/skills` natively, and exposes web search. EyrAgents owns OpenCode configuration; this repo owns the Omarchy host environment. Non-interactive launchers supply the same variables explicitly.
 - The `hypr` package carries personal Hyprland overrides only, loaded after the Omarchy defaults through the Omarchy-owned `~/.config/hypr/hyprland.lua` require chain: `bindings.lua` (the twelve default web-app bindings retired via `hl.unbind`, the personal `SUPER ALT` set and AppImages added), `monitors.lua` (display values), `input.lua` (us/ara layouts, natural scrolling), and `looknfeel.lua` (rounded corners, reduced gaps); no defaults are replicated (deviations documented in `DEVIATIONS.md`). `make verify` asserts every `hl.unbind` target against the installed defaults and fails on a personal chord that collides with a default not unbound above it.
 - Keep every intentional difference documented in `DEVIATIONS.md`; update `README.md`, `AGENTS.md`, and `DEVIATIONS.md` together when ownership, setup, or sync assumptions change.
 
@@ -29,4 +29,4 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 
 ## Skills
 
-- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; its source is `.agents/skills/omasync/SKILL.md`, the Agent Skills standard's home, with tracked symlinks under `.claude/skills` and `.opencode/skills` so all three tools load it
+- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; its source is `.agents/skills/omasync/SKILL.md`, the Agent Skills standard's home, with a tracked symlink under `.claude/skills` for Claude Code; Codex and OpenCode read `.agents/skills` natively

@@ -10,8 +10,9 @@ source "$OMARCHY_PATH/default/bash/rc"
 
 # Personal overrides
 
-# Keep OpenCode on managed skills and expose its configured web-search tool
-export OPENCODE_DISABLE_EXTERNAL_SKILLS=1
+# Skip the Claude Code skill copies (OpenCode reads .agents/skills natively) and
+# expose its configured web-search tool
+export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1
 export OPENCODE_ENABLE_EXA=1
 
 # The AI tools run as EyrAgents configures them: drop Omarchy's launch aliases,

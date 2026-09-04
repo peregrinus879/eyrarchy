@@ -30,7 +30,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
    - the `unalias` line against `default/bash/aliases`: it must name exactly Omarchy's AI launch aliases (`c`, `cx`, `cy`, `ic`, `ix`, and `icx` today); a new upstream launch alias joins the line and a renamed one leaves it
-   - the `OPENCODE_DISABLE_EXTERNAL_SKILLS` and `OPENCODE_ENABLE_EXA` exports stay additive unless Omarchy starts setting `OPENCODE_*` variables
+   - the `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS` and `OPENCODE_ENABLE_EXA` exports stay additive unless Omarchy starts setting `OPENCODE_*` variables
    - `y()` is additive (Yazi is not in Omarchy)
    - the sourced `tdw` and `hdw` twins against `default/bash/fns/tmux` and `default/bash/fns/herdr`: they stay additive alongside `tdl`/`tds` and `hdl`/`hds`, and a change to either lands in EyrWSL in the same session (`make twins`)
 3. Compare `hypr/bindings.lua` against the installed defaults at `/usr/share/omarchy/default/hypr/bindings/` (`applications.lua` carries the app and web-app set) and the user seed at `/usr/share/omarchy/config/hypr/bindings.lua`; the shipped `omarchy` skill owns the binding API, inspection commands, and validation loop:
