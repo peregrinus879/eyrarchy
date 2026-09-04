@@ -10,7 +10,7 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 
 ## Invariants
 
-- Target machine: Omarchy; run `stow`, `clean`, `recover`, and `verify` only on the Omarchy host. `lint`, `check`, `twins`, and `refs` run anywhere.
+- Target machine: Omarchy. `stow`, `unstow`, `restow`, `clean`, `recover`, and `verify` refuse elsewhere, and `restow` refuses from a clone whose links are not the deployed ones; `lint`, `check`, `test`, `twins`, and `refs` run anywhere.
 - Because the packages are live configuration on the stowed host, an edit to a stowed file here is active for the next shell, Hyprland reload (Hyprland reloads on save), Neovim session, or Yazi launch before any commit; work on this repository only in a session H is watching.
 - Stow runs with `--no-folding`, so every managed parent under `$HOME` is a real directory and only leaf files are links; generated host state therefore never reaches a package source. `make clean` removes only leftover folded links, dangling links whose text names a package entry this repository has, and regular files at owned paths (Omarchy clobber artifacts); `make verify` fails on a folded managed directory.
 - When editing sibling dotfiles repos, use identical wording for shared concepts; only repo-specific values (scope, package lists, invariants) differ.
@@ -24,11 +24,9 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 
 ## Post-Change Verification
 
-- Run `make lint` and `make check` after any change; CI runs both on every push to `main` and every pull request, and host-bound checks never run in CI.
-- Run `make restow` and then `make verify` from the repo root on the Omarchy host after changing owned packages; deploying and verifying are the agent's steps (shared guidance), never left to H.
 - Start a fresh shell and Neovim session after structural changes.
 - The full human checklist lives in `README.md` (Verify and Maintenance).
 
 ## Skills
 
-- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs
+- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; `.agents/skills` and `.opencode/skills` carry tracked symlinks so Codex and OpenCode load it too

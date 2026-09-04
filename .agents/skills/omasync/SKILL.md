@@ -1,0 +1,1 @@
+../../../.claude/skills/omasync/SKILL.md

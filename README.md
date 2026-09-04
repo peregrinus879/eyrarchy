@@ -151,7 +151,7 @@ If the old clone is no longer available, `make clean` (section 3) removes its da
 After stowing or changing owned packages:
 
 - Run `make lint` and `make check` after any change; both are repository-only (ShellCheck; bash, Lua, and TOML syntax; the `tests/` fixtures), and GitHub Actions runs them on every push to `main` and every pull request, plus `make twins` against a fresh EyrWSL clone.
-- Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages: `check` and `twins`, then the stowed symlinks (compared by resolved path), every managed parent being a real directory, the Git identity (it must resolve to a GitHub no-reply address; the value is not printed), every `hl.unbind` target and personal chord in `bindings.lua` against the installed Omarchy defaults, and Hyprland config errors.
+- Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages: `lint`, `check`, and `twins`, then the stowed symlinks (compared by resolved path), every managed parent being a real directory, the Git identity (it must resolve to a GitHub no-reply address; the value is not printed), every `hl.unbind` target and personal chord in `bindings.lua` against the installed Omarchy defaults, and Hyprland config errors.
 - Start a fresh shell and confirm `printenv OPENCODE_DISABLE_EXTERNAL_SKILLS` and `printenv OPENCODE_ENABLE_EXA` each print `1`; non-interactive OpenCode launchers must supply both variables themselves.
 - Start a fresh shell and confirm `type y` shows the Yazi cd-on-exit function.
 - Start a fresh shell and confirm `alias claude c cx cy ic ix icx` reports no alias for any of them: the AI tools run as EyrAgents configures them.
@@ -169,7 +169,8 @@ A repo-root `Makefile` keeps the package list in one place and wraps the routine
 - `make lint` - ShellCheck over the bash package, `scripts/`, and `tests/`; `.shellcheckrc` disables the upstream-derived warnings so new issues stand out
 - `make check` - repository-only checks: bash, Lua, and TOML syntax, then the `tests/` fixtures (`prepare-stow.sh` in a fake home, `check-bindings.sh` against fake defaults)
 - `make twins` - twin-file sync against the EyrWSL clone (`SIBLING`, default `~/Projects/eyrie/eyrwsl`); a missing sibling is reported as a skipped check
-- `make verify` - `check` and `twins`, then the host checks listed under Verify
+- `make test` - the `tests/` fixtures alone, in fake homes
+- `make verify` - `lint`, `check`, and `twins`, then the host checks listed under Verify; refuses off the Omarchy host
 - `make clean` - guarded stow preparation (`scripts/prepare-stow.sh`); leftover folded links, dangling clone links, and clobber artifacts only, aborts before removing anything otherwise
 - `make recover` - the Recovery steps after `omarchy-reinstall-configs` (clean + restow)
 - `make refs` - clone, fast-forward, and prune the reference clones under `~/Projects/quarry` to the family's `references.txt` files, repointing moved GitHub remotes (`/omasync` step 1)

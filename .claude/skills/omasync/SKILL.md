@@ -37,7 +37,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
    - every `hl.unbind` target must still match a default chord, and personal chords must not collide with new defaults
    - verify live registration by description and modmask via `hyprctl binds`; Omarchy registers Lua bindings as opaque `__lua` dispatchers, so exec strings never appear there
    - the file stays personal overrides only; defaults are never replicated
-   - `make verify` runs `scripts/check-bindings.sh` for the unbind-target and collision assertions; run it after every change here
+   - `make verify` runs `scripts/check-bindings.sh` for the unbind-target and collision assertions
 4. Compare `yazi/yazi.toml` against official Yazi docs, and the `nvim/` plugin specs against `obsidian.nvim/` and the render-markdown.nvim README
 5. App parity sweep: diff `pacman -Qe` against the installed default manifest (`/usr/share/omarchy/install/omarchy-base.packages` plus hardware conditionals) and the optional installers (`omarchy-install-*`); classify each extra as personal, optional-installed, or retired survivor, and account for provider resolution (`extra/neovim` satisfies the `nvim` entry)
 6. Tool-path integrity: every managed CLI in `~/.local/bin` (the `omarchy-mise-install` lines in `/usr/share/omarchy/install/user/mise.sh`: claude, codex, opencode, gemini, copilot, gh, and the rest) must be the Omarchy mise wrapper; `omarchy-refresh-applications` deletes and rewrites them through `omarchy-mise-install`, so verify with `head -3` on each and `mise ls --current`. Hand-installed scripts and the EyrAgents spar links are unmanaged and survive. Native install stores are removable only after confirming the running binary path via `/proc/<pid>/exe`

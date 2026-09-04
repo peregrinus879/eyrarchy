@@ -27,7 +27,7 @@ LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.
 TOML_FILES := yazi/.config/yazi/yazi.toml
 OMARCHY_HYPR := /usr/share/omarchy/default/hypr
 
-.PHONY: help stow unstow dry-run restow lint check twins verify clean recover refs
+.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins verify clean recover refs
 
 # recover's prerequisites (clean, restow) must run in order, never concurrently.
 .NOTPARALLEL:
@@ -54,26 +54,45 @@ help:
 	@echo "  stow      Stow all packages into ~"
 	@echo "  unstow    Remove all package symlinks"
 	@echo "  dry-run   Preview stow actions without making changes"
-	@echo "  restow    Re-stow after repo content changes"
+	@echo "  restow    Re-stow after repo content changes (Omarchy host, deployed clone only)"
 	@echo "  lint      ShellCheck over the bash package, scripts/, and tests/ (.shellcheckrc holds the disable list)"
-	@echo "  check     Repository-only checks: bash, Lua, and TOML syntax, then the tests/ fixtures (runs in CI)"
+	@echo "  check     Repository-only checks: bash, Lua, and TOML syntax, then test (runs in CI)"
+	@echo "  test      Run the tests/ fixtures in fake homes"
 	@echo "  twins     Twin-file sync against the EyrWSL clone at SIBLING (skipped when absent)"
-	@echo "  verify    check and twins, then host checks: links, real parents, Git identity, Hyprland unbind chords and config errors"
+	@echo "  verify    lint, check, and twins, then host checks: links, real parents, Git identity, Hyprland unbind chords and config errors"
 	@echo "  clean     Guarded stow preparation: leftover folds, dangling clone links, and clobber artifacts only (scripts/prepare-stow.sh)"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone, fast-forward, and prune the reference clones under ~/Projects/quarry to the family's references.txt files"
 
-stow:
+# Host-bound targets refuse elsewhere, and a managed endpoint that is a link
+# must resolve into this clone so a reference clone never redeploys the
+# packages from itself.
+require-host:
+	@[[ -d /usr/share/omarchy ]] || { echo "FAIL: the Omarchy host is required for this target"; exit 1; }
+
+require-clone:
+	@fail=0; \
+	while IFS= read -r -d '' src; do \
+	  target="$$HOME/$${src#*/}"; \
+	  [[ -L $$target ]] || continue; \
+	  case $$(readlink -f -- "$$target") in \
+	    "$(CURDIR)"/*) ;; \
+	    *) echo "FAIL: $$target is linked from another clone; run make stow from the deployed clone"; fail=1 ;; \
+	  esac; \
+	done < <(git ls-files -z --cached --others --exclude-standard -- $(PACKAGES)); \
+	exit $$fail
+
+stow: require-host
 	$(STOW) -v $(PACKAGES)
 	$(hypr_reload)
 
-unstow:
+unstow: require-host
 	$(STOW) -D -v $(PACKAGES)
 
 dry-run:
 	$(STOW) -n -v $(PACKAGES)
 
-restow:
+restow: require-host require-clone
 	$(STOW) -R -v $(PACKAGES)
 	$(hypr_reload)
 
@@ -103,8 +122,11 @@ check:
 	  fi; \
 	done; \
 	exit $$fail
-	@for t in tests/*.sh; do bash "$$t" || exit 1; done
+	@$(MAKE) --no-print-directory test
 	@echo "ok:   check"
+
+test:
+	@set -e; for t in tests/*.sh; do bash "$$t"; done
 
 twins:
 	@command -v cmp > /dev/null || { echo "FAIL: required verifier 'cmp' is missing"; exit 1; }
@@ -128,7 +150,7 @@ twins:
 # a folded one means a folding deployment that make restow has not replaced.
 # The Git identity check prints no value. The unbind chord check reads the
 # installed Omarchy defaults, so it fails closed off-host.
-verify: check twins
+verify: require-host lint check twins
 	@command -v readlink > /dev/null || { echo "FAIL: required verifier 'readlink' is missing"; exit 1; }
 	@fail=0; \
 	for src in $$(git ls-files --cached --others --exclude-standard -- $(PACKAGES)); do \
@@ -160,7 +182,7 @@ verify: check twins
 	exit $$fail
 	@echo "ok:   verify"
 
-clean:
+clean: require-host
 	@EYRARCHY_PACKAGES='$(PACKAGES)' bash scripts/prepare-stow.sh
 
 recover: clean restow
