@@ -29,4 +29,4 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 
 ## Skills
 
-- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; `.agents/skills` and `.opencode/skills` carry tracked symlinks so Codex and OpenCode load it too
+- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; its source is `.agents/skills/omasync/SKILL.md`, the Agent Skills standard's home, with tracked symlinks under `.claude/skills` and `.opencode/skills` so all three tools load it

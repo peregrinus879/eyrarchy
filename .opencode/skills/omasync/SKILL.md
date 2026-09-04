@@ -1,1 +1,1 @@
-../../../.claude/skills/omasync/SKILL.md
+../../../.agents/skills/omasync/SKILL.md
