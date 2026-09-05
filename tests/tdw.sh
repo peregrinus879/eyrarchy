@@ -1,10 +1,10 @@
 #!/bin/bash
 # Fixtures for the tdw workspace launcher on an isolated tmux server: one
 # window named after the project with the agent at full height on the left
-# half, the editor over a 25% shell on the right, and focus on the agent; the
+# half, the editor and shell split equally on the right, and focus on the agent; the
 # three agents and their continue forms; re-attach; the root-collision guard;
 # and the usage and missing-agent refusals. Stub agents record their arguments;
-# attaching is recorded instead of performed, since the fixture has no terminal.
+# ordinary attaches are recorded; a control client tests creation inside tmux.
 # The fixture detaches itself from any controlling terminal, so the launcher
 # sizes the window from LINES and COLUMNS and the geometry is deterministic.
 set -euo pipefail
@@ -18,7 +18,7 @@ ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 TMP=$(mktemp -d)
 SOCKET="tdw-test-$$"
 trap 'command tmux -L "$SOCKET" kill-server >/dev/null 2>&1 || true; rm -rf -- "$TMP"' EXIT
-unset TMUX
+unset TMUX TMUX_PANE
 
 fail() {
   printf 'FAIL: %s\n' "$1" >&2
@@ -66,30 +66,71 @@ wait_for_call() {
   return 1
 }
 
-case_layout() {
-  local dir="$TMP/proj/alpha.one" session="alpha-one" line
+assert_layout() {
+  local session=$1 width=$2 height=$3 line
   local -a editor=() agent=() shell=() fields=()
-  project "$dir"
-  (cd "$dir" && tdw cc) || fail "tdw cc failed"
-  [[ $(tmux list-windows -t "=$session" -F '#{window_name}:#{window_panes}') == "alpha.one:3" ]] ||
-    fail "expected one window named after the project with three panes"
   # active left top width height window_width window_height
   while IFS= read -r line; do
     read -r -a fields <<<"$line"
     if ((fields[1] == 0)); then agent=("${fields[@]}"); elif ((fields[2] > 0)); then shell=("${fields[@]}"); else editor=("${fields[@]}"); fi
   done < <(tmux list-panes -t "=$session" -F '#{pane_active} #{pane_left} #{pane_top} #{pane_width} #{pane_height} #{window_width} #{window_height}')
   ((${#editor[@]} && ${#agent[@]} && ${#shell[@]})) || fail "could not classify the three panes"
-  ((shell[5] == 200 && shell[6] == 50)) || fail "window was not created at the terminal size (${shell[5]}x${shell[6]})"
+  ((shell[5] == width && shell[6] == height)) || fail "unexpected window size (${shell[5]}x${shell[6]}, expected ${width}x${height})"
   ((agent[0] == 1)) || fail "focus did not land on the agent pane"
   ((editor[1] == agent[3] + 1)) || fail "editor pane does not sit right of the agent"
   (( editor[3] - agent[3] <= 1 && agent[3] - editor[3] <= 1 )) || fail "agent and editor are not split 50/50 (${agent[3]} vs ${editor[3]})"
   ((shell[1] == editor[1] && shell[3] == editor[3])) || fail "shell does not sit under the editor at its width"
   ((agent[4] == agent[6])) || fail "agent pane does not take the full window height"
-  ((shell[4] * 100 <= 25 * shell[6] + 100 && shell[4] * 100 >= 25 * shell[6] - 100)) || fail "shell height is not 25% (${shell[4]} of ${shell[6]})"
+  ((editor[4] - shell[4] <= 1 && shell[4] - editor[4] <= 1)) || fail "editor and shell are not split 50/50 (${editor[4]} vs ${shell[4]})"
   ((editor[4] + shell[4] + 1 == shell[6])) || fail "editor row and shell do not fill the window height"
+}
+
+case_layout() {
+  local dir="$TMP/proj/alpha.one" session="alpha-one"
+  project "$dir"
+  (cd "$dir" && tdw cc) || fail "tdw cc failed"
+  [[ $(tmux list-windows -t "=$session" -F '#{window_name}:#{window_panes}') == "alpha.one:3" ]] ||
+    fail "expected one window named after the project with three panes"
+  assert_layout "$session" 200 50
+  tmux resize-window -t "=$session" -x 201 -y 61
+  assert_layout "$session" 201 61
+  tmux resize-window -t "=$session" -x 200 -y 50
+  assert_layout "$session" 200 50
   wait_for_call "claude" || fail "claude did not start in the agent pane"
   grep -qF -- "attach-session -t =$session" "$TMP/attach.log" || fail "creation did not attach"
   [[ $(tmux show-option -t "$session" -qv @dw_root) == "$dir" ]] || fail "session root was not recorded"
+}
+
+case_inside_tmux() {
+  local dir="$TMP/proj/inside" caller launch i client_pid width height
+  project "$dir"
+  tmux new-session -d -s source -x 200 -y 50
+  coproc TDW_CLIENT { command tmux -L "$SOCKET" -C attach-session -t =source >"$TMP/client.log"; }
+  client_pid=$TDW_CLIENT_PID
+  printf 'refresh-client -C 200,50\n' >&"${TDW_CLIENT[1]}"
+  for ((i = 0; i < 40; i++)); do
+    [[ $(tmux list-clients -F '#{client_width}') == 200 ]] && break
+    sleep 0.25
+  done
+  ((i < 40)) || fail "control client did not attach at the requested size"
+  read -r width height < <(tmux display-message -p -t =source: '#{window_width} #{window_height}')
+  caller=$(tmux split-window -h -l 50% -t =source: -P -F '#{pane_id}')
+  caller=$(tmux split-window -v -l 4 -t "$caller" -P -F '#{pane_id}')
+  # This executes in the pane's real tty, not the fixture's detached shell.
+  printf -v launch 'source %q; cd %q; tdw cc; tmux set-option -g @tdw_fixture_done "$?"' \
+    "$ROOT/bash/.config/bash/functions/tdw" "$dir"
+  tmux send-keys -t "$caller" "$launch" C-m
+  for ((i = 0; i < 40; i++)); do
+    [[ -n $(tmux show-option -gqv @tdw_fixture_done) ]] && break
+    sleep 0.25
+  done
+  [[ $(tmux show-option -gqv @tdw_fixture_done) == 0 ]] || fail "tdw inside tmux did not finish successfully"
+  [[ $(tmux show-option -t inside -v default-size) == "${width}x${height}" ]] ||
+    fail "nested launch used the calling pane size rather than the full window"
+  [[ $(tmux list-clients -F '#{session_name}') == inside ]] || fail "nested launch did not switch the client"
+  assert_layout inside "$width" "$height"
+  printf 'detach-client\n' >&"${TDW_CLIENT[1]}"
+  wait "$client_pid"
 }
 
 case_continue_forms() {
@@ -130,4 +171,5 @@ case_layout
 case_continue_forms
 case_reattach_and_collision
 case_refusals
-printf 'ok:   tdw builds the one-window layout with the agent focused, continues each agent, re-attaches, and refuses bad input\n'
+case_inside_tmux
+printf 'ok:   tdw builds equal splits outside and inside tmux, survives resizing, focuses and continues agents, re-attaches, and refuses bad input\n'

@@ -1,7 +1,7 @@
 # Create or resume a Dev Workspace: one tmux session per project holding
-# Omarchy's dev layout in one window named after the project: the AI agent on
-# the left at full height, $EDITOR on the right over a shell on the bottom 25%
-# of that column (50/50 by width). Focus lands on the agent.
+# a dev layout in one window named after the project: the AI agent on the
+# left at full height, $EDITOR and a shell stacked equally on the right
+# (50/50 by width). Focus lands on the agent.
 # Usage: tdw <cc|cx|oc> [-c]   cc = Claude Code, cx = Codex, oc = OpenCode;
 # -c continues the agent's last conversation in this project. Bare tdw
 # re-attaches an existing project session. One agent per workspace by design
@@ -49,11 +49,14 @@ tdw() {
       echo "tdw: required agent '$binary' is not installed"
       return 1
     fi
-    # Create the window at the terminal's size: tmux hands a later resize out
-    # equally across the stacked rows, which would grow the shell past 25%
+    # Inside tmux, the tty is only the calling pane, not the full window.
+    # Start at the full size so switching clients does not stretch the layout.
     local size lines="" cols="" agent_pane editor_pane
     local -a size_args=()
-    if size=$({ stty size < /dev/tty; } 2>/dev/null) && [[ $size =~ ^[0-9]+\ [0-9]+$ ]]; then
+    if [[ -n ${TMUX:-} ]]; then
+      size=$(tmux display-message -p -t "${TMUX_PANE:-}" '#{window_height} #{window_width}') || return 1
+      read -r lines cols <<<"$size"
+    elif size=$({ stty size < /dev/tty; } 2>/dev/null) && [[ $size =~ ^[0-9]+\ [0-9]+$ ]]; then
       read -r lines cols <<<"$size"
     else
       lines=${LINES:-} cols=${COLUMNS:-}
@@ -61,9 +64,9 @@ tdw() {
     [[ -n $lines && -n $cols && $lines -gt 0 && $cols -gt 0 ]] && size_args=(-x "$cols" -y "$lines")
     agent_pane=$(tmux new-session -d -s "$session" -c "$root" -n "$(basename "$root")" "${size_args[@]}" -P -F '#{pane_id}')
     tmux set-option -t "$session" @dw_root "$root"
-    # The agent keeps the left half at full height; the editor takes the right half, with the shell on its bottom 25%
+    # The agent keeps the left half at full height; the editor and shell share the right half equally.
     editor_pane=$(tmux split-window -h -l 50% -t "$agent_pane" -c "$root" -P -F '#{pane_id}')
-    tmux split-window -v -l 25% -t "$editor_pane" -c "$root"
+    tmux split-window -v -l 50% -t "$editor_pane" -c "$root"
     tmux send-keys -t "$agent_pane" "$command" C-m
     tmux send-keys -t "$editor_pane" "${EDITOR:-nvim} ." C-m
     tmux select-pane -t "$agent_pane"
