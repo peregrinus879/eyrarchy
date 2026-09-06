@@ -29,6 +29,10 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 
 ## Intentional Deviations
 
+### Dotfile Management
+
+- GNU Stow with `--no-folding` keeps managed parents real and leaf ownership explicit. Every host-writing Make target checks host and deployed-clone ownership before mutation. Cleanup preflights the complete owned layout, removing only owned folds and recognized dangling clone links; regular files, foreign links, and special files refuse unchanged. `.NOTPARALLEL` serializes one Make invocation, not independent deployments or disk failures.
+
 ### Bash
 
 - `.bashrc` opens with the upstream seed preamble (`/usr/share/omarchy/default/bashrc`), kept verbatim, then adds personal overrides below; Omarchy writes to `.bashrc` reach the repo file through the stow symlink.

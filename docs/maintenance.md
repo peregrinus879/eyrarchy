@@ -4,7 +4,8 @@ Unresolved decisions, deferred work, active limitations, and the dated evidence 
 
 ## Active Limitations
 
-- Omarchy's config refresh and reset scripts copy defaults with no symlink awareness (checked against the installed 4.0.2-1 scripts on 2026-09-03; recheck at each omarchy package update): `omarchy-refresh-config`, and `omarchy-refresh-hyprland` through it, `cp -f` the shipped default through each stowed link into the repo working tree, leaving the link in place and a timestamped `.bak` of the personal content beside it; `omarchy-reinstall-configs` replays `/etc/skel` over `$HOME` with `cp -af`. After either, `git restore` the clobbered package files, then run `make recover`.
+- Omarchy's config refresh and reset scripts copy defaults with no symlink awareness (checked against the installed 4.0.2-1 scripts on 2026-09-03; recheck at each omarchy package update): `omarchy-refresh-config`, and `omarchy-refresh-hyprland` through it, `cp -f` the shipped default through each stowed link into the repo working tree, leaving the link in place and a timestamped `.bak` of the personal content beside it; `omarchy-reinstall-configs` replays `/etc/skel` over `$HOME` with `cp -af`. Follow README's exact-path/hunk review and preservation-first recovery, not blanket restoration or removal. Regular-file replacements now cause unchanged preparation refusal; a pathname alone cannot establish disposable clobber content.
+- Deployment preflight does not roll back disk I/O failure or serialize independent Make processes. Revalidate this limitation before introducing concurrent deployments.
 
 ## Open Decisions
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Fixtures for scripts/prepare-stow.sh: a fake HOME holding a fake clone with
 # this repo's package shape, laid out as Stow links it. Leftover folded links,
-# dangling links from a moved clone, and clobber artifacts are removed; live
+# dangling links from a moved clone are removed; regular files, live
 # leaf links, repo content, and unowned entries are untouched; anything
 # unrecognized aborts before any removal; a no-folding deployment keeps every
 # managed parent real so host-local files never reach a package source.
@@ -10,6 +10,9 @@ set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 TMP=$(mktemp -d)
 trap 'rm -rf -- "$TMP"' EXIT
+export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
+export PREPARE_STOW_OMARCHY_ROOT="$TMP/omarchy"
+mkdir -p "$PREPARE_STOW_OMARCHY_ROOT"
 PACKAGES='bash hypr nvim yazi'
 
 fail() {
@@ -29,13 +32,14 @@ make_clone() {
   printf 'obsidian\n' >"$repo/nvim/.config/nvim/lua/plugins/obsidian.lua"
   printf 'yazi\n' >"$repo/yazi/.config/yazi/yazi.toml"
   cp -- "$ROOT/scripts/prepare-stow.sh" "$repo/scripts/prepare-stow.sh"
+  cp -- "$ROOT/Makefile" "$repo/Makefile"
   git -C "$repo" init -q
   git -C "$repo" add -A
 }
 
 prepare() { HOME=$1 EYRARCHY_PACKAGES=$PACKAGES bash "$2/scripts/prepare-stow.sh"; }
 # shellcheck disable=SC2086
-deploy() { stow --no-folding -R -d "$2" -t "$1" $PACKAGES; }
+deploy() { HOME=$1 stow --no-folding -R -d "$2" -t "$1" $PACKAGES; }
 
 snapshot() {
   (cd -- "$1" && find . -path ./.git -prune -o -type f -print0 | sort -z | xargs -0 sha256sum)
@@ -103,7 +107,7 @@ case_no_folding() {
   [[ ! -e $repo/yazi/.config/yazi/package.toml ]] || fail "host-local state reached the package source"
 }
 
-case_clobber_artifacts() {
+case_regular_files() {
   local home="$TMP/clobber/home" repo="$TMP/clobber/home/Projects/eyrarchy" path
   mkdir -p "$home/.config/hypr" "$home/.config/yazi"
   make_clone "$repo"
@@ -111,10 +115,12 @@ case_clobber_artifacts() {
   printf 'clobbered\n' >"$home/.config/hypr/bindings.lua"
   printf 'clobbered\n' >"$home/.config/yazi/yazi.toml"
   printf 'omarchy\n' >"$home/.config/hypr/hyprland.lua"
-  prepare "$home" "$repo" >/dev/null || fail "clobber artifacts did not succeed"
+  ln -s ../Projects/eyrarchy/bash/.config/bash "$home/.config/bash"
+  if prepare "$home" "$repo" >/dev/null 2>&1; then fail "regular files at owned paths did not abort"; fi
   for path in .bashrc .config/hypr/bindings.lua .config/yazi/yazi.toml; do
-    [[ ! -e $home/$path ]] || fail "clobber artifact remains: $path"
+    [[ $(<"$home/$path") == clobbered ]] || fail "unfamiliar regular file was changed: $path"
   done
+  [[ -L $home/.config/bash ]] || fail "a fold was removed before the regular-file refusal"
   [[ -d $home/.config/yazi && ! -L $home/.config/yazi ]] || fail "real yazi directory was removed"
   [[ $(<"$home/.config/hypr/hyprland.lua") == omarchy ]] || fail "unowned regular file was changed"
 }
@@ -193,10 +199,54 @@ case_missing_packages() {
   fi
 }
 
+case_make_guards() {
+  local home="$TMP/make/home" repo="$TMP/make/eyrarchy" other="$TMP/make/deployed" bin="$TMP/make/bin" target out
+  mkdir -p "$home/.config" "$bin"
+  make_clone "$repo"
+  make_clone "$other"
+  ln -s "$other/bash/.bashrc" "$home/.bashrc"
+  ln -s "$TMP/make/old/yazi/.config/yazi" "$home/.config/yazi"
+  # Observe the actual Make recipes, delaying the clone guard to expose -j races.
+  cat >"$bin/bash" <<'SH'
+#!/bin/bash
+if [[ ${1:-} == scripts/prepare-stow.sh ]]; then
+  case ${2:-} in
+    --require-clone) printf 'guard\n' >>"$EYR_TEST_EVENTS"; sleep 0.05 ;;
+    --require-host) ;;
+    *) printf 'write\n' >>"$EYR_TEST_EVENTS" ;;
+  esac
+fi
+exec /bin/bash "$@"
+SH
+  chmod +x "$bin/bash"
+  for target in stow unstow restow clean recover 'clean restow' 'restow clean'; do
+    : >"$TMP/make/events"
+    local -a goals=()
+    read -r -a goals <<<"$target"
+    if out=$(HOME=$home PATH="$bin:$PATH" EYR_TEST_EVENTS="$TMP/make/events" make --no-print-directory -C "$repo" -j8 "${goals[@]}" 2>&1); then
+      fail "Make accepted a wrong deployed clone: $target"
+    fi
+    [[ $out == *'another clone'* ]] || fail "Make failed for the wrong reason ($target): $out"
+    [[ $(<"$TMP/make/events") != *write* ]] || fail "cleanup started before the clone guard refused: $target"
+    [[ -L $home/.config/yazi && $(readlink -- "$home/.bashrc") == "$other/bash/.bashrc" ]] || fail "Make changed links before refusal: $target"
+  done
+  rm -- "$home/.bashrc"
+  ln -s "$repo/bash/.bashrc" "$home/.bashrc"
+  : >"$TMP/make/events"
+  HOME=$home PATH="$bin:$PATH" EYR_TEST_EVENTS="$TMP/make/events" make --no-print-directory -C "$repo" -j8 clean >/dev/null || fail "guarded Make clean failed in the deployed fixture"
+  [[ $(<"$TMP/make/events") == $'guard\nwrite' && ! -L $home/.config/yazi ]] || fail "guard and cleanup were not ordered"
+  # The same real target must also stop on the wrong host before cleanup.
+  ln -s "$TMP/make/old/yazi/.config/yazi" "$home/.config/yazi"
+  if HOME=$home PREPARE_STOW_OMARCHY_ROOT="$TMP/missing-omarchy" make --no-print-directory -C "$repo" -j8 clean restow >/dev/null 2>&1; then
+    fail "Make accepted a non-Omarchy host"
+  fi
+  [[ -L $home/.config/yazi ]] || fail "host refusal happened after cleanup"
+}
+
 case_fresh_home
 case_owned_entries
 case_no_folding
-case_clobber_artifacts
+case_regular_files
 case_moved_clone
 case_dangling_unrelated
 case_foreign_link
@@ -204,4 +254,5 @@ case_foreign_fold
 case_special_file
 case_directory_at_leaf
 case_missing_packages
-printf 'ok:   prepare-stow removes leftover folds, dangling clone links, and clobber artifacts, keeps live links, and aborts untouched otherwise\n'
+case_make_guards
+printf 'ok:   prepare-stow preserves regular files and foreign entries; actual Make deployment targets guard before cleanup, including -j\n'

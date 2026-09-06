@@ -29,7 +29,7 @@ OMARCHY_HYPR := /usr/share/omarchy/default/hypr
 
 .PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins verify clean recover refs
 
-# recover's prerequisites (clean, restow) must run in order, never concurrently.
+# Deployment goals and their guards must never race, including `make -j clean restow`.
 .NOTPARALLEL:
 
 # Hyprland auto-reloads on config changes and caches an error if a reload
@@ -60,7 +60,7 @@ help:
 	@echo "  test      Run the tests/ fixtures in fake homes"
 	@echo "  twins     Twin-file sync against the EyrWSL clone at SIBLING (skipped when absent)"
 	@echo "  verify    lint, check, and twins, then host checks: links, real parents, Git identity, Hyprland unbind chords and config errors"
-	@echo "  clean     Guarded stow preparation: leftover folds, dangling clone links, and clobber artifacts only (scripts/prepare-stow.sh)"
+	@echo "  clean     Guarded stow preparation: leftover folds and dangling clone links only; regular files are preserved"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone, fast-forward, and prune the reference clones under ~/Projects/quarry to the family's references.txt files"
 
@@ -68,31 +68,22 @@ help:
 # must resolve into this clone so a reference clone never redeploys the
 # packages from itself.
 require-host:
-	@[[ -d /usr/share/omarchy ]] || { echo "FAIL: the Omarchy host is required for this target"; exit 1; }
+	@bash scripts/prepare-stow.sh --require-host
 
-require-clone:
-	@fail=0; \
-	while IFS= read -r -d '' src; do \
-	  target="$$HOME/$${src#*/}"; \
-	  [[ -L $$target ]] || continue; \
-	  case $$(readlink -f -- "$$target") in \
-	    "$(CURDIR)"/*) ;; \
-	    *) echo "FAIL: $$target is linked from another clone; run make stow from the deployed clone"; fail=1 ;; \
-	  esac; \
-	done < <(git ls-files -z --cached --others --exclude-standard -- $(PACKAGES)); \
-	exit $$fail
+require-clone: require-host
+	@EYRARCHY_PACKAGES='$(PACKAGES)' bash scripts/prepare-stow.sh --require-clone
 
-stow: require-host
+stow: require-clone
 	$(STOW) -v $(PACKAGES)
 	$(hypr_reload)
 
-unstow: require-host
+unstow: require-clone
 	$(STOW) -D -v $(PACKAGES)
 
 dry-run:
 	$(STOW) -n -v $(PACKAGES)
 
-restow: require-host require-clone
+restow: require-clone
 	$(STOW) -R -v $(PACKAGES)
 	$(hypr_reload)
 
@@ -182,10 +173,10 @@ verify: require-host lint check twins
 	exit $$fail
 	@echo "ok:   verify"
 
-clean: require-host
+clean: require-clone
 	@EYRARCHY_PACKAGES='$(PACKAGES)' bash scripts/prepare-stow.sh
 
-recover: clean restow
+recover: require-clone clean restow
 
 # omasync step 1. Clones what references.txt lists and the quarry lacks,
 # repoints moved GitHub remotes, fast-forwards each listed clone, and removes

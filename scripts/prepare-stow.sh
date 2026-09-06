@@ -13,15 +13,16 @@
 #   - a leaf link that resolves into this repo is left alone: Stow owns it
 #   - a dangling link, parent or leaf, whose text names a package path this
 #     repo has (a moved or deleted clone) is removed
-#   - a regular file at an owned leaf path is removed as an Omarchy clobber
-#     artifact (omarchy-refresh-* and omarchy-reinstall-configs write real files
-#     through or over stowed links)
+#   - a regular file at an owned path aborts: its pathname does not prove it is
+#     a disposable Omarchy clobber artifact; compare and move or merge it first
 #   - an entry beneath a folded parent queued for removal is skipped: it is
 #     repo working-tree content and disappears with the fold
 #   - anything else (a symlink that resolves elsewhere, a directory or special
-#     file at a leaf path, a regular file reached through a parent that resolves
-#     into this repo) aborts the run
+#     file at a leaf path) aborts the run
 # EYRARCHY_PACKAGES carries the package list; the Makefile owns it.
+# --require-host and --require-clone are read-only guards used by every
+# host-writing Make target. The host fixture override requires both HOME and
+# this script's clone below TMPDIR, never the login home.
 set -euo pipefail
 
 abort() {
@@ -31,6 +32,24 @@ abort() {
 
 repo=$(realpath -e -- "$(dirname -- "${BASH_SOURCE[0]}")/..") || abort 'cannot resolve the repository root'
 [[ -n ${HOME:-} && $HOME != / && -d $HOME ]] || abort 'HOME must name an existing non-root directory'
+HOME=$(realpath -e -- "$HOME") || abort 'cannot resolve HOME'
+[[ $HOME != / ]] || abort 'HOME must name an existing non-root directory'
+[[ $# -le 1 && ( ${1:-} == '' || ${1:-} == --require-host || ${1:-} == --require-clone ) ]] || abort "unsupported arguments: $*"
+if [[ ${1:-} != --require-clone ]]; then
+  omarchy=/usr/share/omarchy
+  if [[ -n ${PREPARE_STOW_OMARCHY_ROOT:-} ]]; then
+    login_home=$(getent passwd "$(id -un)" | cut -d: -f6)
+    temp_root=$(realpath -e -- "${TMPDIR:-/tmp}")
+    [[ ( $temp_root == /tmp || $temp_root == /tmp/* || $temp_root == /var/tmp || $temp_root == /var/tmp/* ) &&
+      -n $login_home && $(realpath -m -- "$HOME") != "$(realpath -m -- "$login_home")" &&
+      $(realpath -e -- "$HOME") == "$temp_root"/* && $repo == "$temp_root"/* &&
+      $(realpath -m -- "$PREPARE_STOW_OMARCHY_ROOT") == "$temp_root"/* ]] ||
+      abort 'PREPARE_STOW_OMARCHY_ROOT requires a temporary clone and non-live HOME under TMPDIR'
+    omarchy=$PREPARE_STOW_OMARCHY_ROOT
+  fi
+  [[ -d $omarchy ]] || abort 'the Omarchy host is required for this target'
+fi
+[[ ${1:-} != --require-host ]] || exit 0
 [[ -n ${EYRARCHY_PACKAGES:-} ]] || abort 'EYRARCHY_PACKAGES is required'
 read -r -a packages <<<"$EYRARCHY_PACKAGES"
 ((${#packages[@]})) || abort 'package list is empty'
@@ -40,12 +59,6 @@ resolves_into_repo() {
   local resolved
   resolved=$(readlink -f -- "$1") || return 1
   [[ $resolved == "$repo"/* ]]
-}
-
-parent_resolves_into_repo() {
-  local resolved
-  resolved=$(readlink -f -- "$(dirname -- "$1")") || return 1
-  [[ $resolved == "$repo" || $resolved == "$repo"/* ]]
 }
 
 # Link text that names a package entry this repo really has: the package name
@@ -61,7 +74,7 @@ managed_link_text() {
   return 1
 }
 
-declare -a remove_folds=() remove_links=() remove_files=()
+declare -a remove_folds=() remove_links=()
 
 # A dangling link is judged by its text alone; it aborts unless the text names
 # a package path this repo has.
@@ -82,8 +95,10 @@ under_queued_fold() {
 }
 
 # Owned leaves and their parents, from the Git-visible package files.
-declare -a leaves=() parents=()
-while IFS= read -r -d '' source; do
+declare -a leaves=() parents=() sources=()
+mapfile -d '' -t sources < <(git -C "$repo" ls-files -z --cached --others --exclude-standard -- "${packages[@]}")
+scan=$!; wait "$scan" || abort 'cannot enumerate package files'
+for source in "${sources[@]}"; do
   rel=${source#*/}
   leaves+=("$HOME/$rel")
   dir=$rel
@@ -91,11 +106,20 @@ while IFS= read -r -d '' source; do
     dir=${dir%/*}
     parents+=("$HOME/$dir")
   done
-done < <(git -C "$repo" ls-files -z --cached --others --exclude-standard -- "${packages[@]}")
+done
 ((${#leaves[@]})) || abort 'no Git-visible package files found'
 if ((${#parents[@]})); then
   mapfile -d '' -t parents < <(printf '%s\0' "${parents[@]}" | sort -z -u)
 fi
+
+# Inspect parents too: a foreign folded directory can hide missing endpoints.
+for path in "${parents[@]}" "${leaves[@]}"; do
+  [[ -L $path ]] || continue
+  resolves_into_repo "$path" && continue
+  if [[ ! -e $path ]] && managed_link_text "$(readlink -- "$path")"; then continue; fi
+  abort "$path is linked from another clone or an unmanaged location; run from the deployed clone"
+done
+[[ ${1:-} != --require-clone ]] || exit 0
 
 # Parents shallowest first, so a fold is queued before anything beneath it is
 # looked at; entries under a queued fold are repo content and are skipped.
@@ -126,16 +150,14 @@ for leaf in "${leaves[@]}"; do
       abort "$leaf is a symlink that does not resolve into this repo; refusing to remove it"
     fi
   elif [[ -f $leaf ]]; then
-    parent_resolves_into_repo "$leaf" &&
-      abort "$leaf is a regular file reached through a parent that resolves into this repo; refusing to remove repo content"
-    remove_files+=("$leaf")
+    abort "$leaf is a regular file; compare and move or merge it before retrying"
   else
     abort "$leaf is neither a symlink nor a regular file; refusing to remove it"
   fi
 done
 
 # Mutation begins only after every owned path is classified.
-if ((${#remove_folds[@]} + ${#remove_links[@]} + ${#remove_files[@]} == 0)); then
+if ((${#remove_folds[@]} + ${#remove_links[@]} == 0)); then
   printf 'prepare-stow: nothing to remove\n'
   exit 0
 fi
@@ -146,8 +168,4 @@ done
 for path in "${remove_links[@]}"; do
   rm -- "$path"
   printf 'removed: %s (dangling symlink into a former clone)\n' "$path"
-done
-for path in "${remove_files[@]}"; do
-  rm -f -- "$path"
-  printf 'removed: %s (regular file at an owned path, Omarchy clobber artifact)\n' "$path"
 done

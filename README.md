@@ -85,13 +85,15 @@ Checklist before stowing:
 - Omarchy is installed and functional
 - Yazi is installed
 - The vault is synced to `~/Projects/vault` (or `OBSIDIAN_VAULT` is set) if you use the Obsidian workflow
-- Any existing conflicting files were removed
+- Reported conflicts were compared and any needed content preserved at explicitly reviewed backup paths
 
-Remove existing files that would conflict with stow. The guarded preparation script derives the owned paths from the package files and removes only folded directory links left by a folding deployment, dangling symlinks left by a moved or deleted clone, and regular files at owned paths (Omarchy clobber artifacts); live leaf links stay for Stow to manage, and anything unrecognized aborts the run before anything is removed:
+Preview before cleanup. The guarded preparation script derives owned paths from package files and preflights the complete layout. It removes only owned folded links and recognized dangling clone links; live leaf links stay for Stow. Every regular file is preserved and causes refusal, even at an owned path: the pathname does not prove it is an Omarchy clobber artifact. Compare each reported file and deliberately move or merge its needed content before retrying; foreign links and special files also refuse unchanged.
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
+make dry-run
 make clean
+make dry-run
 ```
 
 ### 4. Stow
@@ -142,9 +144,9 @@ If the old clone is no longer available, `make clean` (section 3) removes its da
 
 ### Recovery After Omarchy Config Resets
 
-`omarchy-reinstall-configs` overwrites `~/.bashrc` and `~/.config/` from Omarchy defaults (via `cp -af /etc/skel/. ~/`). After running it, `git restore` any repo files it clobbered through stow symlinks, then run `make recover` from the repo root (the Prepare cleanup plus a re-stow).
+`omarchy-reinstall-configs` overwrites `~/.bashrc` and `~/.config/` from Omarchy defaults (via `cp -af /etc/skel/. ~/`). Inspect `git status` and the exact affected diff before restoring anything; preserve unrelated or pre-existing edits. Restore only H-approved clobbered paths/hunks, then run `make recover` from the deployed clone (guarded cleanup plus restow). A replacement regular file is a preservation/refusal case, not automatic cleanup: compare and back it up deliberately first.
 
-`omarchy-refresh-hyprland` (and `omarchy-refresh-config` generally) copies shipped defaults over existing files with `cp -f`, which writes through a stow symlink into the repo working tree; the symlink itself survives and a timestamped `.bak` of the personal content is left beside it. After it runs, `git restore hypr/.config/hypr/` is the whole recovery.
+`omarchy-refresh-hyprland` (and `omarchy-refresh-config` generally) copies shipped defaults over existing files with `cp -f`, which writes through a Stow symlink into the repo working tree; the link survives and a timestamped `.bak` of the personal content is left beside it. Compare the backup, current diff, and intended source before an exact-path/hunk restoration. Do not restore the whole Hyprland directory blindly; keep unrelated work and verify the result.
 
 ## Verify
 
@@ -171,9 +173,11 @@ A repo-root `Makefile` keeps the package list in one place and wraps the routine
 - `make twins` - twin-file sync against the EyrWSL clone (`SIBLING`, default `~/Projects/eyrie/eyrwsl`); a missing sibling is reported as a skipped check
 - `make test` - the `tests/` fixtures alone, in fake homes
 - `make verify` - `lint`, `check`, and `twins`, then the host checks listed under Verify; refuses off the Omarchy host
-- `make clean` - guarded stow preparation (`scripts/prepare-stow.sh`); leftover folded links, dangling clone links, and clobber artifacts only, aborts before removing anything otherwise
+- `make clean` - guarded Stow preparation (`scripts/prepare-stow.sh`); owned folded links and recognized dangling clone links only, with every regular file preserved and complete preflight refusal on foreign entries
 - `make recover` - the Recovery steps after `omarchy-reinstall-configs` (clean + restow)
 - `make refs` - clone, fast-forward, and prune the reference clones under `~/Projects/quarry` to the family's `references.txt` files, repointing moved GitHub remotes (`/omasync` step 1)
+
+Every host-writing Make target checks host and deployed-clone ownership before mutation. Deployment goals are serialized within one Make invocation, including `make -j`; this is not rollback against I/O failure or independent concurrent deployments.
 
 `make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only. `.github/workflows/test.yml` runs `make lint`, `make check`, and `make twins` on every push to `main` and every pull request.
 
