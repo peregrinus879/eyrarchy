@@ -12,6 +12,8 @@ Unresolved decisions, deferred work, active limitations, and the dated evidence 
 
 - Whether `/omasync` keeps its "present proposed changes before editing" rule as a deliberate exception to shared guidance, under which an implementation request authorizes edits. Upstream sync is judgment-heavy and touches many files, which argues for keeping the rule with its reason stated in the skill.
 - Whether to clean the inert leftovers on this host: the pre-quattro `~/.config/hypr/*.conf` set (including the orphaned NVIDIA `envs.conf`), the legacy `~/.local/share/omarchy` tree, the `*.omarchy-upgrade-to-quattro.*.bak` files, and the stale mise wrappers in `~/.local/bin` (`omarchy-refresh-applications` rewrites them in the current form). The active Lua chain reads none of the config leftovers, and the mise install directories precede `~/.local/bin` on `PATH`; cleanup is outside repo ownership.
+- Deferred current decision, audit 8: explicit-target/completion-aware, reference-safe vault rename and promotion are not implemented. Keep current note operations and shared Obsidian plugin specs unchanged; revisit only on H's explicit note-workflow request, coordinating both twins and the vault project's own scripts.
+- Deferred current decisions, audits 21 and 22: immutable approved deployments and new trust/disclosure tiers are not implemented. Continue live Stow and existing EyrAgents policy; the canonical [EyrAgents decisions](https://github.com/peregrinus879/eyragents/blob/main/docs/maintenance.md#open-decisions) own any future change. This repo remains the Omarchy desktop owner, not the harness or WSL owner.
 
 ## Deferred Work
 
