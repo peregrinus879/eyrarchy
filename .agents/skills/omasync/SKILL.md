@@ -9,7 +9,7 @@ Source configs from the installed Omarchy defaults, the reference repos, and off
 
 ## Sources
 
-Local reference clones live under `~/Projects/quarry/`; `references.txt` at the repo root names the ones this repo needs, and the family union of every sibling's file defines the quarry (`make refs` clones, updates, and prunes to it):
+Local reference clones live under `~/Projects/quarry/`; `references.txt` names this repo's needs and the family union defines the maintained set. `make refs` creates missing entries only from this repo's manifest, updates existing family-listed clones to exact fetched-upstream parity, and reports but preserves unlisted clones:
 
 - `omarchy/` - main repo for bash, tmux, and general Omarchy defaults; `make refs` keeps it on the upstream default branch, which upstream moves between releases, so pin release comparisons to the installed version's tag (`git show <installed-tag>:<path>`)
 - `omarchy-pkgs/` - Omarchy's package build recipes, for package version and dependency questions
@@ -26,7 +26,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 
 ## Workflow
 
-1. Run `make refs` first, every time: `scripts/update-references.sh` clones what `references.txt` lists and the quarry lacks, resolves each listed clone to its current GitHub location and repoints a moved remote, checks out the upstream default branch and fast-forwards it, and removes clean clones no family repository lists. Fix anything it reports before comparing, and when it reports a repointed origin, update that URL in `references.txt` and `DEVIATIONS.md` (Reference Sources). When this repo starts or stops using a reference, change `references.txt`; the clones follow. Updating the quarry is this skill's job, never H's preparation.
+1. Before reference mutation, run `bash scripts/update-references.sh --dry-run` and review its scope. The preview can query GitHub through `gh api`, but does not fetch or prove upstream parity or absence of incoming conflicts. Obtain H's explicit approval for each new clone or remote repointing, and for any separately proposed destructive resolution; routine preservation-safe refreshes of existing declared clones remain the skill's work within shared authorization. Then run `make refs`. Atomic, non-forced fetches preserve existing local tags and annotations, import new tags, and prune only origin tracking branches; this is not a transaction across clones. Checkout/merge use `--no-overwrite-ignore` to preserve ignored files. Ahead/divergent branches and tag/file conflicts refuse that update; do not force or delete to obtain a pass. Unlisted clones are reported and kept. Resolve failed updates before comparing, without assuming earlier successful updates rolled back. If an approved origin move occurs, align its URL in `references.txt` and `DEVIATIONS.md`. Manifest changes define maintenance scope, not permission to create, repoint or delete unreviewed targets.
 2. Compare `bash/.bashrc` against the current Omarchy Bash defaults, in the reference clone under `omarchy/default/` and installed under `/usr/share/omarchy/default/`:
    - the upstream preamble (everything above `# Personal overrides`) against `default/bashrc`, the seed Omarchy installs as `/etc/skel/.bashrc`; it is kept verbatim, so adopt upstream changes to it
    - the `unalias` line against `default/bash/aliases`: it must name exactly Omarchy's AI launch aliases (`c`, `cx`, `cy`, `ic`, `ix`, and `icx` today); a new upstream launch alias joins the line and a renamed one leaves it
@@ -57,6 +57,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 
 - `README.md`, `AGENTS.md`, and `DEVIATIONS.md` reflect any ownership, setup, or workflow changes
 - Every retained difference is still documented in `DEVIATIONS.md`
+- For twin changes, `make twins` checks local worktrees; after both commits exist, `twins-pair` checks the exact full `SELF_COMMIT`/`PEER_COMMIT` pair at `SIBLING`. Inputs remain literal data and peer code never executes. Hosted final-pair evidence must name the final published commits; earlier-peer CI is not a substitute or publication authorization
 - The final summary distinguishes adopted changes, rejected changes, and intentional retained differences
 
 ## Rules

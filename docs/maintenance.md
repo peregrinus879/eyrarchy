@@ -5,7 +5,7 @@ Unresolved decisions, deferred work, active limitations, and the dated evidence 
 ## Active Limitations
 
 - Omarchy's config refresh and reset scripts copy defaults with no symlink awareness (checked against the installed 4.0.2-1 scripts on 2026-09-03; recheck at each omarchy package update): `omarchy-refresh-config`, and `omarchy-refresh-hyprland` through it, `cp -f` the shipped default through each stowed link into the repo working tree, leaving the link in place and a timestamped `.bak` of the personal content beside it; `omarchy-reinstall-configs` replays `/etc/skel` over `$HOME` with `cp -af`. Follow README's exact-path/hunk review and preservation-first recovery, not blanket restoration or removal. Regular-file replacements now cause unchanged preparation refusal; a pathname alone cannot establish disposable clobber content.
-- Deployment preflight does not roll back disk I/O failure or serialize independent Make processes. Revalidate this limitation before introducing concurrent deployments.
+- Deployment preflight does not roll back disk I/O failure or serialize independent Make processes. `twins-pair` attests exact committed twin blobs, not deployment or publication authorization; CI must name the final published pair. Revalidate these limits before introducing concurrent deployments or changing the CI pair protocol.
 
 ## Open Decisions
 
@@ -14,6 +14,8 @@ Unresolved decisions, deferred work, active limitations, and the dated evidence 
 
 ## Deferred Work
 
+- Reference maintenance host evidence: fixtures do not establish the state of the shared quarry. On the next authorized reference-dependent maintenance pass, preview with `bash scripts/update-references.sh --dry-run`, obtain approval for new clones/repointing, then run the preservation-first update. Confirm exact fetched parity and preservation of local tags and ignored/stale content without disclosing private values. Keep failures explicit; revalidate after updater or Git transport changes and remove this item when the host pass is complete.
+- Coordinated twin CI remains pending: after both final commits are available, validate the explicit reviewed pair using full SHAs and retain both IDs in the hosted evidence. Do not treat a green earlier-peer run as final-pair confirmation or dispatch/publish without H's authorization.
 - Watch omacom/omarchy#7327 (qt6-wayland install-reason gap from the quattro upgrade, filed from this account, open as of 2026-09-03); this host is repaired (`pacman -D --asexplicit qt6-wayland`), so drop this line when the issue closes.
 - Upstream watches, rechecked at each omarchy package update (last 4.0.2-1, 2026-09-03): `tdl` still ends with `select-pane -t "$opencode_pane"` on a variable it never sets (cosmetic focus regression; no local guard is tracked); the planned "dots" user-config preservation feature (`022f6993`, plans only) could overlap this repo's stow approach when it ships.
 
