@@ -61,9 +61,10 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 
 ### Neovim
 
-- `omarchy-nvim` owns the base Neovim config. This repo adds two additive plugin specs for the vault workflow.
+- `omarchy-nvim` owns the base Neovim config. This repo adds vault plugin specs and contextual Git-review mappings without editing the base or installed plugin caches.
 - `obsidian.lua` configures obsidian.nvim against the vault at `~/Projects/vault` (override with `OBSIDIAN_VAULT`), including slug-rename and promote workflows that shell out to the vault's `normalize.py`, plus confirm-prompted delete workflows.
 - `render-markdown.lua` adds visual markdown rendering; a companion, not required by obsidian.nvim.
+- `git-review.lua` overrides only Snacks `gd`, `gD`, and `gs` review mappings, choosing the current file/directory or Neo-tree selection's Git root on each invocation, resolving symlink targets and supporting linked worktrees. Empty/special non-explorer buffers use window cwd; a known non-Git target warns without falling back to an unrelated repository. No global/window directory change is introduced. The spec and mocked regression suite are byte-identical twins with EyrWSL.
 - Runtime dependencies beyond the base install: `ripgrep`, `python3`, and `wl-clipboard`, all present on Omarchy.
 - The spec carries a WSL-guarded `open.func` override that routes URIs through Windows interop; it is inert on Omarchy, where the default `vim.ui.open` applies. Both repos track byte-identical copies of the spec.
 - `theme.lua` in `~/.config/nvim/lua/plugins/` stays Omarchy-managed by the theme system and is not tracked here.

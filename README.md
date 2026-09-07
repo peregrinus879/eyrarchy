@@ -28,7 +28,7 @@ Local clones live side by side under `~/Projects/eyrie/`.
 
 - **Base**: [Omarchy](https://github.com/omacom/omarchy)
 - **Bash**: Personal alias, function, and OpenCode host-environment overrides on top of Omarchy defaults
-- **Editor**: [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) and [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) plugin specs on the `omarchy-nvim` base
+- **Editor**: [obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim), [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim), and contextual Snacks Git-review mappings on the `omarchy-nvim` base
 - **File Manager**: [Yazi](https://github.com/sxyazi/yazi) (not part of Omarchy)
 - **Desktop**: [Hyprland](https://github.com/hyprwm/Hyprland) personal keybindings, display, input, and look-and-feel config
 
@@ -39,7 +39,7 @@ Each top-level directory is a GNU Stow package that symlinks into `$HOME`:
 ```text
 bash/   Bash overrides (.bashrc with Omarchy defaults sourced + personal additions, tdw and hdw workspace functions)
 hypr/   Hyprland personal overrides (bindings.lua, monitors.lua, input.lua, looknfeel.lua)
-nvim/   Additive Neovim plugin specs for the vault workflow (obsidian.lua, render-markdown.lua)
+nvim/   Additive Neovim plugin specs for vault workflows and contextual Git review
 yazi/   Yazi file manager config (yazi.toml, no theme)
 ```
 
@@ -148,6 +148,12 @@ If the old clone is no longer available, `make clean` (section 3) removes its da
 
 `omarchy-refresh-hyprland` (and `omarchy-refresh-config` generally) copies shipped defaults over existing files with `cp -f`, which writes through a Stow symlink into the repo working tree; the link survives and a timestamped `.bak` of the personal content is left beside it. Compare the backup, current diff, and intended source before an exact-path/hunk restoration. Do not restore the whole Hyprland directory blindly; keep unrelated work and verify the result.
 
+## Git Review
+
+After stowing, start a fresh Neovim session once to load `git-review.lua`. `Space g d` shows staged and unstaged hunks, `Space g D` compares against origin, and `Space g s` shows status including untracked files. Each invocation uses the current file/directory's Git repository or the selected Neo-tree item, falling back to the displayed tree root when no item path exists. Symlink targets and linked worktrees are supported; switching files between repositories switches the review target without changing any editor directory.
+
+Empty or special non-explorer buffers use the current window's directory. A known non-Git file or explorer target warns instead of silently reviewing another repository. No recurring `:cd`/`:lcd` is needed for repository files or selected repository folders. Keep the ordinary picker review controls; do not use its stage/restore actions unless intended.
+
 ## Verify
 
 Workspace fixtures exercise isolated tmux servers with fake agents and a Python-backed Herdr model. They cover creation, ownership, failure recovery and concurrency without using running user workspaces or real agents; rendered UI and actual-host activation remain separate checks.
@@ -164,6 +170,7 @@ After stowing or changing owned packages:
 - `hl.env` values in the tracked hypr files reach the compositor on reload but reach uwsm-launched clients only at session start; after first adopting the hypr package on a running session, log out and back in once.
 - Run `yazi` and confirm the layout ratio and sort order match the config.
 - Open a vault note in Neovim and confirm obsidian.nvim loads (`<leader>oo` opens the note switcher).
+- Check Git review from files in two repositories and from a selected Neo-tree repository folder while the editor was launched in their non-Git parent; `Space g d` and `Space g s` must target the selection without changing `:pwd`.
 
 ## Maintenance
 
@@ -182,11 +189,11 @@ A repo-root `Makefile` keeps the package list in one place and wraps the routine
 
 Every host-writing Make target checks host and deployed-clone ownership before mutation. Deployment goals are serialized within one Make invocation, including `make -j`; this is not rollback against I/O failure or independent concurrent deployments.
 
-`make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only.
-
 Before running `make refs`, preview with `bash scripts/update-references.sh --dry-run` and approve any new clone or remote repointing separately. The preview can query GitHub but does not fetch or establish conflict-free upstream parity. Routine authorized refreshes remain the sync skill's work; atomic fetch does not make the whole family update transactional.
 
 `make refs` refuses ahead-only/divergent listed default branches instead of calling them current. Its atomic, non-forced fetch preserves existing local tags and annotations, imports new tags, and prunes only origin tracking branches. Checkout and merge use `--no-overwrite-ignore`, preserving ignored files in listed clones. Tag/file conflicts refuse that update and require separate review; do not force a tag replacement or delete local files to make it pass. Stale references are informational and require separate review of all refs, stashes, and ignored/untracked files before any manual removal.
+
+`make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only.
 
 CI runs `make lint`, `make check`, and `twins-pair` on pushes to `main` and pull requests, using the peer default branch for normal runs. Manual workflow dispatch accepts an explicit full `peer_commit` only with `peer_reviewed=true`; it fetches peer objects without executing peer code and records both actual commits. This attestation is not publication authorization. For coordinated changes, verify the final published pair explicitly after both commits are available; a green check against an earlier peer is not final-pair evidence. Local `make twins` remains a worktree convenience check that can skip a missing sibling.
 
