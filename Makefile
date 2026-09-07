@@ -27,7 +27,9 @@ TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   yazi/.config/yazi/yazi.toml \
   scripts/update-references.sh \
   tests/update-references.sh \
-  tests/tdw.sh
+  tests/tdw.sh \
+  tests/hdw.sh \
+  tests/fixtures/herdr
 
 BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*)
 LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.lua)
