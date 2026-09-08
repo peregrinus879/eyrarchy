@@ -32,7 +32,7 @@ end
 LUA
 cat >"$TMP/defaults/bindings/utilities.lua" <<'LUA'
 o.bind_toggle("SUPER + CTRL + N", "Toggle nightlight", "nightlight")
-o.bind("SUPER + ALT + G", "Move window out of group", hl.dsp.moveoutofgroup)
+o.bind("SUPER + ALT + G", "Move active window out of group", hl.dsp.window.move({ out_of_group = true }))
 LUA
 
 cat >"$TMP/good.lua" <<'LUA'
@@ -65,3 +65,25 @@ mkdir -p "$TMP/empty-defaults"
 expect_failure "defaults without chords" bash "$ROOT/scripts/check-bindings.sh" "$TMP/good.lua" "$TMP/empty-defaults"
 
 printf 'ok:   check-bindings asserts unbind targets and personal chords against the defaults\n'
+
+# Evaluate registrations, not their actions; no compositor, app or browser runs.
+lua - "$ROOT/hypr/.config/hypr/bindings.lua" <<'LUA'
+local grouping, ungroup = {}, {}
+local bindings = { ["SUPER + G"] = grouping, ["SUPER + ALT + G"] = ungroup }
+hl = { unbind = function(chord) bindings[chord] = nil end }
+o = { bind = function(chord, description, action)
+  assert(bindings[chord] == nil, "binding collision: " .. chord)
+  bindings[chord] = { description = description, action = action }
+end }
+dofile(arg[1])
+assert(bindings["SUPER + G"] == grouping, "native grouping toggle was replaced")
+assert(bindings["SUPER + ALT + G"] == ungroup, "native ungroup binding was replaced")
+assert(bindings["SUPER + ALT + B"].description == "Basecamp")
+assert(bindings["SUPER + ALT + B"].action.webapp == "https://launchpad.37signals.com")
+assert(bindings["SUPER + ALT + C"].description == "ChatGPT (web)")
+assert(bindings["SUPER + ALT + C"].action.webapp == "https://chatgpt.com")
+assert(bindings["SUPER + SHIFT + C"].description == "ChatGPT")
+assert(bindings["SUPER + SHIFT + C"].action.launch == "chatgpt")
+assert(bindings["SUPER + SHIFT + C"].action.focus == "^chatgpt$")
+LUA
+printf 'ok:   personal bindings preserve native grouping and distinguish Basecamp/ChatGPT web from desktop ChatGPT\n'

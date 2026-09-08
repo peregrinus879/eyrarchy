@@ -19,10 +19,10 @@ hl.unbind("SUPER + SHIFT + ALT + X")  -- X Post
 o.bind("SUPER + SHIFT + A", "AppImages", "uwsm-app -- it.mijorus.gearlever")
 o.bind("SUPER + SHIFT + C", "ChatGPT", { launch = "chatgpt", focus = "^chatgpt$" })
 
--- Web apps (SUPER + ALT); Gmail takes the key from the group tiling default
-hl.unbind("SUPER + ALT + G")
+-- Web apps (SUPER + ALT), using chords free in Omarchy defaults
 o.bind("SUPER + ALT + A", "Claude", { webapp = "https://claude.ai" })
-o.bind("SUPER + ALT + G", "Gmail", { webapp = "https://mail.google.com" })
+o.bind("SUPER + ALT + B", "Basecamp", { webapp = "https://launchpad.37signals.com" })
+o.bind("SUPER + ALT + C", "ChatGPT (web)", { webapp = "https://chatgpt.com" })
 o.bind("SUPER + ALT + H", "GitHub", { webapp = "https://github.com/" })
 o.bind("SUPER + ALT + I", "LinkedIn", { webapp = "https://linkedin.com" })
 o.bind("SUPER + ALT + L", "CFI", { webapp = "https://learn.corporatefinanceinstitute.com" })
