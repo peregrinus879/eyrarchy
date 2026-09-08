@@ -22,6 +22,14 @@ Unresolved decisions, deferred work, active limitations, and the dated evidence 
 - Watch omacom/omarchy#7327 (qt6-wayland install-reason gap from the quattro upgrade, filed from this account, open as of 2026-09-03); this host is repaired (`pacman -D --asexplicit qt6-wayland`), so drop this line when the issue closes.
 - Upstream watches, rechecked at each omarchy package update (last 4.0.2-1, 2026-09-03): `tdl` still ends with `select-pane -t "$opencode_pane"` on a variable it never sets (cosmetic focus regression; no local guard is tracked); the planned "dots" user-config preservation feature (`022f6993`, plans only) could overlap this repo's stow approach when it ships.
 
+### Desktop Keybindings
+
+Queued by H on 2026-09-08; not applied. Verify the Omarchy host, current upstream bindings/unbinds, collisions and intended app targets before editing the live configuration.
+
+- Remove the personal `SUPER ALT G` override and restore Omarchy's group-tiling default, including any corresponding unbind that would otherwise suppress it.
+- Add `SUPER ALT B` for Basecamp; confirm the intended webapp target rather than invent a project/account URL.
+- Add `SUPER ALT C` for the ChatGPT webapp and retain `SUPER SHIFT C` for the installed app. H's intended distinction is Alt for the webapp and Shift for the installed app.
+
 ## Revalidation Triggers
 
 - Each omarchy package update (`pacman -Q omarchy`): rerun `/omasync`, recheck every item above that names a version, then run `make verify`.
