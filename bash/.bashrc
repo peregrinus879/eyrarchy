@@ -15,11 +15,6 @@ source "$OMARCHY_PATH/default/bash/rc"
 export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1
 export OPENCODE_ENABLE_EXA=1
 
-# The AI tools run as EyrAgents configures them: drop Omarchy's launch aliases,
-# which set permission modes, approval flags, and tdl targets EyrAgents and the
-# workspace launchers own
-unalias c cx cy ic ix icx 2> /dev/null
-
 # Yazi cd-on-exit (Yazi is not part of Omarchy)
 y() {
   local tmp cwd
@@ -31,10 +26,7 @@ y() {
   rm -f -- "$tmp"
 }
 
-# Tmux Dev Workspace launcher (twin file with EyrWSL)
-[[ -f ~/.config/bash/functions/tdw ]] && source ~/.config/bash/functions/tdw
-
-# Herdr Dev Workspace launcher (twin file with EyrWSL)
+# Herdr workspace initializer (twin file with EyrWSL)
 if command -v herdr > /dev/null && [[ -f ~/.config/bash/functions/hdw ]]; then
   source ~/.config/bash/functions/hdw
 fi

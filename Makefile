@@ -23,13 +23,11 @@ override export PEER_COMMIT := $(value PEER_COMMIT)
 TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   nvim/.config/nvim/lua/plugins/render-markdown.lua \
   nvim/.config/nvim/lua/plugins/git-review.lua \
-  bash/.config/bash/functions/tdw \
   bash/.config/bash/functions/hdw \
   yazi/.config/yazi/yazi.toml \
   scripts/update-references.sh \
   tests/update-references.sh \
   tests/git-review.sh \
-  tests/tdw.sh \
   tests/hdw.sh \
   tests/fixtures/herdr
 
@@ -71,8 +69,8 @@ help:
 	@echo "  test      Run the tests/ fixtures in fake homes"
 	@echo "  twins     Twin-file sync against the EyrWSL clone at SIBLING (skipped when absent)"
 	@echo "  twins-pair  Read-only committed twin check: full SELF_COMMIT and PEER_COMMIT, with the peer objects at SIBLING"
-	@echo "  verify    lint, check, and twins, then host checks: links, real parents, Git identity, Hyprland unbind chords and config errors"
-	@echo "  clean     Guarded stow preparation: leftover folds and dangling clone links only; regular files are preserved"
+	@echo "  verify    lint, check, and twins, then host checks: retired absence, sources/links, real parents, Git identity, Hyprland chords/errors"
+	@echo "  clean     Guarded stow preparation: owned folds, dangling clone links and exact retired links; regular files are preserved"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone and fast-forward listed references to exact upstream parity; report and keep stale clones"
 
@@ -107,7 +105,7 @@ lint:
 # fixture suites. Needs no Omarchy host, stowed links, or Hyprland session.
 # Fail closed: a missing verifier binary must fail the run, not skip a check.
 check:
-	@for tool in luac python3 git stow tmux; do \
+	@for tool in luac python3 git stow; do \
 	  command -v "$$tool" > /dev/null || { echo "FAIL: required verifier '$$tool' is missing"; exit 1; }; \
 	done
 	@fail=0; \
@@ -173,12 +171,18 @@ twins-pair:
 # a folded one means a folding deployment that make restow has not replaced.
 # The Git identity check prints no value. The unbind chord check reads the
 # installed Omarchy defaults, so it fails closed off-host.
+# Explicit retired endpoints are checked even after their sources leave Git;
+# only those known deletions are excluded from the live inventory below.
 verify: require-host lint check twins
 	@command -v readlink > /dev/null || { echo "FAIL: required verifier 'readlink' is missing"; exit 1; }
+	@EYRARCHY_PACKAGES='$(PACKAGES)' bash scripts/prepare-stow.sh --check-retired
 	@fail=0; \
 	for src in $$(git ls-files --cached --others --exclude-standard -- $(PACKAGES)); do \
+	  [[ $$src == bash/.config/bash/functions/tdw ]] && continue; \
 	  target="$$HOME/$${src#*/}"; \
-	  if [[ "$$(readlink -f "$$target")" == "$$(readlink -f "$$src")" ]]; then \
+	  if [[ ! -e $$src ]]; then \
+	    echo "FAIL: managed source is missing: $$src"; fail=1; \
+	  elif [[ "$$(readlink -f "$$target")" == "$$(readlink -f "$$src")" ]]; then \
 	    echo "ok:   $$target resolves into the repo"; \
 	  else \
 	    echo "FAIL: $$target does not resolve into the repo"; fail=1; \
@@ -189,7 +193,7 @@ verify: require-host lint check twins
 	  if [[ -d $$target && ! -L $$target ]]; then echo "ok:   $$target is a real directory"; \
 	  else echo "FAIL: managed directory is folded or missing: $$target"; fail=1; fi; \
 	done < <(git ls-files --cached --others --exclude-standard -- $(PACKAGES) | \
-	  while IFS= read -r src; do rel=$${src#*/}; \
+	  while IFS= read -r src; do [[ $$src == bash/.config/bash/functions/tdw ]] && continue; rel=$${src#*/}; \
 	  while [[ $$rel == */* ]]; do rel=$${rel%/*}; echo "$$rel"; done; done | sort -u); \
 	if [[ "$$(git config user.email)" == *@users.noreply.github.com ]]; then \
 	  echo "ok:   git identity resolves to a GitHub no-reply address"; \

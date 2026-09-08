@@ -4,7 +4,8 @@
 # Stow runs with --no-folding, so live deployments are real parent directories
 # holding leaf links that Stow itself manages. This script removes only what
 # Stow cannot reconcile. Owned paths are derived from the Git-visible package
-# files (tracked plus untracked, minus ignored): each file maps to its stow
+# files (tracked plus untracked, minus ignored), plus the exact retired mapping
+# below, which survives source deletion from Git: each file maps to its stow
 # target under $HOME, and every directory between $HOME and that target is a
 # managed parent. Every owned path is classified before anything is removed,
 # so an unrecognized entry aborts the run untouched:
@@ -19,10 +20,17 @@
 #     repo working-tree content and disappears with the fold
 #   - anything else (a symlink that resolves elsewhere, a directory or special
 #     file at a leaf path) aborts the run
+# Retired endpoints accept only exact links to this clone's former source,
+# never the moved-clone text heuristic. Their parents must be safe real
+# directories or exact owned folds, which are not traversed. Real directories
+# and user state are never removed. --check-retired is read-only and requires
+# the retired source and endpoint to be absent, with no folded/unsafe parent.
 # EYRARCHY_PACKAGES carries the package list; the Makefile owns it.
 # --require-host and --require-clone are read-only guards used by every
 # host-writing Make target. The host fixture override requires both HOME and
-# this script's clone below TMPDIR, never the login home.
+# this script's clone below TMPDIR, never the login home. Deployment roots
+# containing control characters are unsupported and refuse unchanged, both
+# before and after canonicalization; path records must never be newline-trimmed.
 set -euo pipefail
 
 abort() {
@@ -30,22 +38,40 @@ abort() {
   exit 1
 }
 
-repo=$(realpath -e -- "$(dirname -- "${BASH_SOURCE[0]}")/..") || abort 'cannot resolve the repository root'
+reject_control_paths() {
+  local path
+  for path; do
+    [[ $path != *[[:cntrl:]]* ]] || abort 'deployment roots contain unsupported control characters'
+  done
+}
+
+reject_control_paths "${BASH_SOURCE[0]}" "${HOME:-}"
+IFS= read -r -d '' script_dir < <(dirname -z -- "${BASH_SOURCE[0]}") || abort 'cannot determine the script directory'
+IFS= read -r -d '' script_dir < <(realpath -ze -- "$script_dir") || abort 'cannot resolve the script directory'
+reject_control_paths "$script_dir"
+IFS= read -r -d '' repo < <(realpath -ze -- "$script_dir/..") || abort 'cannot resolve the repository root'
+reject_control_paths "$repo"
 [[ -n ${HOME:-} && $HOME != / && -d $HOME ]] || abort 'HOME must name an existing non-root directory'
-HOME=$(realpath -e -- "$HOME") || abort 'cannot resolve HOME'
+IFS= read -r -d '' HOME < <(realpath -ze -- "$HOME") || abort 'cannot resolve HOME'
+reject_control_paths "$HOME"
 [[ $HOME != / ]] || abort 'HOME must name an existing non-root directory'
-[[ $# -le 1 && ( ${1:-} == '' || ${1:-} == --require-host || ${1:-} == --require-clone ) ]] || abort "unsupported arguments: $*"
+[[ $# -le 1 && ( ${1:-} == '' || ${1:-} == --require-host || ${1:-} == --require-clone || ${1:-} == --check-retired ) ]] || abort "unsupported arguments: $*"
 if [[ ${1:-} != --require-clone ]]; then
   omarchy=/usr/share/omarchy
   if [[ -n ${PREPARE_STOW_OMARCHY_ROOT:-} ]]; then
-    login_home=$(getent passwd "$(id -un)" | cut -d: -f6)
-    temp_root=$(realpath -e -- "${TMPDIR:-/tmp}")
+    reject_control_paths "${TMPDIR:-/tmp}" "$PREPARE_STOW_OMARCHY_ROOT"
+    mapfile -t login_homes < <(getent passwd "$(id -u)" | cut -d: -f6)
+    scan=$!; wait "$scan" || abort 'cannot determine the login home'
+    [[ ${#login_homes[@]} == 1 && -n ${login_homes[0]} ]] || abort 'cannot determine one login home'
+    reject_control_paths "${login_homes[0]}"
+    IFS= read -r -d '' login_home < <(realpath -zm -- "${login_homes[0]}") || abort 'cannot resolve the login home'
+    IFS= read -r -d '' temp_root < <(realpath -ze -- "${TMPDIR:-/tmp}") || abort 'cannot resolve TMPDIR'
+    IFS= read -r -d '' omarchy < <(realpath -zm -- "$PREPARE_STOW_OMARCHY_ROOT") || abort 'cannot resolve the Omarchy fixture root'
+    reject_control_paths "$login_home" "$temp_root" "$omarchy"
     [[ ( $temp_root == /tmp || $temp_root == /tmp/* || $temp_root == /var/tmp || $temp_root == /var/tmp/* ) &&
-      -n $login_home && $(realpath -m -- "$HOME") != "$(realpath -m -- "$login_home")" &&
-      $(realpath -e -- "$HOME") == "$temp_root"/* && $repo == "$temp_root"/* &&
-      $(realpath -m -- "$PREPARE_STOW_OMARCHY_ROOT") == "$temp_root"/* ]] ||
+      $HOME != "$login_home" && $HOME == "$temp_root"/* && $repo == "$temp_root"/* &&
+      $omarchy == "$temp_root"/* ]] ||
       abort 'PREPARE_STOW_OMARCHY_ROOT requires a temporary clone and non-live HOME under TMPDIR'
-    omarchy=$PREPARE_STOW_OMARCHY_ROOT
   fi
   [[ -d $omarchy ]] || abort 'the Omarchy host is required for this target'
 fi
@@ -74,7 +100,7 @@ managed_link_text() {
   return 1
 }
 
-declare -a remove_folds=() remove_links=()
+declare -a remove_folds=() remove_links=() remove_retired=()
 
 # A dangling link is judged by its text alone; it aborts unless the text names
 # a package path this repo has.
@@ -94,12 +120,66 @@ under_queued_fold() {
   return 1
 }
 
-# Owned leaves and their parents, from the Git-visible package files.
+# This exact endpoint-to-source inventory is independent of Git and PACKAGES.
+declare -A retired_sources=([.config/bash/functions/tdw]=bash/.config/bash/functions/tdw)
 declare -a leaves=() parents=() sources=()
+
+# NUL records retain trailing newlines, which are part of the link's identity.
+exact_retired_link() {
+  local path=$1 expected=$2 text lexical resolved
+  IFS= read -r -d '' text < <(readlink -z -- "$path") || return 1
+  [[ $text == /* ]] || text="${path%/*}/$text"
+  IFS= read -r -d '' lexical < <(realpath -zms -- "$text") || return 1
+  [[ $lexical == "$expected" ]] || return 1
+  IFS= read -r -d '' resolved < <(realpath -zm -- "$path") || return 1
+  [[ $resolved == "$expected" ]]
+}
+
+# Preflight shallowest first. An exact old fold is left for normal preparation
+# below; never inspect a retired endpoint through that link into source content.
+for rel in "${!retired_sources[@]}"; do
+  source=${retired_sources[$rel]}
+  [[ ! -e $repo/$source && ! -L $repo/$source ]] || abort "retired source still exists: $source"
+  [[ -O $HOME && -r $HOME && -w $HOME && -x $HOME && $((8#$(stat -c %a -- "$HOME") & 0022)) == 0 ]] || abort 'HOME must be accessible, owner-controlled and not group/world-writable'
+  dir=$HOME
+  folded=0
+  IFS=/ read -r -a components <<<"${rel%/*}"
+  for component in "${components[@]}"; do
+    dir+=/$component
+    parents+=("$dir")
+    ((folded)) && continue
+    if [[ -L $dir ]]; then
+      exact_retired_link "$dir" "$repo/${source%%/*}/${dir#"$HOME/"}" ||
+        abort "$dir is an unsafe retired parent linked from another clone or an unmanaged location"
+      [[ ${1:-} != --check-retired ]] || abort "retired parent is folded: $dir; run make clean then make restow"
+      folded=1
+    elif [[ -e $dir ]]; then
+      [[ -d $dir && -O $dir && -r $dir && -w $dir && -x $dir && $((8#$(stat -c %a -- "$dir") & 0022)) == 0 ]] ||
+        abort "$dir is an unsafe retired parent; preserve it and resolve ownership/type/permissions before retrying"
+    fi
+  done
+  ((folded)) && continue
+  path=$HOME/$rel
+  if [[ -L $path ]]; then
+    exact_retired_link "$path" "$repo/$source" ||
+      abort "$path is a retired endpoint linked from another clone or an unmanaged location; refusing to remove it"
+    remove_retired+=("$path")
+  elif [[ -e $path ]]; then
+    abort "$path is a regular file, directory or special entry at a retired endpoint; refusing to remove it"
+  fi
+done
+if [[ ${1:-} == --check-retired ]]; then
+  ((${#remove_retired[@]} == 0)) || abort "retired link remains: ${remove_retired[0]}; run make clean then make restow"
+  printf 'ok:   retired endpoints are absent with safe real parents\n'
+  exit 0
+fi
+
+# Owned live leaves and their parents, from the Git-visible package files.
 mapfile -d '' -t sources < <(git -C "$repo" ls-files -z --cached --others --exclude-standard -- "${packages[@]}")
 scan=$!; wait "$scan" || abort 'cannot enumerate package files'
 for source in "${sources[@]}"; do
   rel=${source#*/}
+  [[ ${retired_sources[$rel]:-} == "$source" ]] && continue
   leaves+=("$HOME/$rel")
   dir=$rel
   while [[ $dir == */* ]]; do
@@ -112,17 +192,9 @@ if ((${#parents[@]})); then
   mapfile -d '' -t parents < <(printf '%s\0' "${parents[@]}" | sort -z -u)
 fi
 
-# Inspect parents too: a foreign folded directory can hide missing endpoints.
-for path in "${parents[@]}" "${leaves[@]}"; do
-  [[ -L $path ]] || continue
-  resolves_into_repo "$path" && continue
-  if [[ ! -e $path ]] && managed_link_text "$(readlink -- "$path")"; then continue; fi
-  abort "$path is linked from another clone or an unmanaged location; run from the deployed clone"
-done
-[[ ${1:-} != --require-clone ]] || exit 0
-
 # Parents shallowest first, so a fold is queued before anything beneath it is
-# looked at; entries under a queued fold are repo content and are skipped.
+# looked at; the clone guard shares this preflight rather than inspecting
+# source content through folds in a separate endpoint scan.
 for dir in "${parents[@]}"; do
   under_queued_fold "$dir" && continue
   if [[ -L $dir ]]; then
@@ -131,7 +203,7 @@ for dir in "${parents[@]}"; do
     elif [[ ! -e $dir ]]; then
       queue_dangling_link "$dir"
     else
-      abort "$dir is a symlink that does not resolve into this repo; refusing to remove it"
+      abort "$dir is linked from another clone or an unmanaged location; run from the deployed clone"
     fi
   elif [[ -e $dir && ! -d $dir ]]; then
     abort "$dir is neither a directory nor a symlink; refusing to continue"
@@ -147,7 +219,7 @@ for leaf in "${leaves[@]}"; do
     elif [[ ! -e $leaf ]]; then
       queue_dangling_link "$leaf"
     else
-      abort "$leaf is a symlink that does not resolve into this repo; refusing to remove it"
+      abort "$leaf is linked from another clone or an unmanaged location; run from the deployed clone"
     fi
   elif [[ -f $leaf ]]; then
     abort "$leaf is a regular file; compare and move or merge it before retrying"
@@ -155,9 +227,10 @@ for leaf in "${leaves[@]}"; do
     abort "$leaf is neither a symlink nor a regular file; refusing to remove it"
   fi
 done
+[[ ${1:-} != --require-clone ]] || exit 0
 
 # Mutation begins only after every owned path is classified.
-if ((${#remove_folds[@]} + ${#remove_links[@]} == 0)); then
+if ((${#remove_folds[@]} + ${#remove_links[@]} + ${#remove_retired[@]} == 0)); then
   printf 'prepare-stow: nothing to remove\n'
   exit 0
 fi
@@ -168,4 +241,8 @@ done
 for path in "${remove_links[@]}"; do
   rm -- "$path"
   printf 'removed: %s (dangling symlink into a former clone)\n' "$path"
+done
+for path in "${remove_retired[@]}"; do
+  rm -- "$path"
+  printf 'removed: %s (exact retired link into this clone)\n' "$path"
 done
