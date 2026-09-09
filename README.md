@@ -18,7 +18,7 @@ Omarchy + personal deviations   → EyrArcHy
 Omarchy + WSL deviations        → EyrWSL
 ```
 
-- [`eyragents`](https://github.com/peregrinus879/eyragents) - AI agent harness: Claude Code, Codex, and OpenCode settings, shared guidance, and commit workflow
+- [`eyragents`](https://github.com/peregrinus879/eyragents) - AI agent harness: Claude Code, Codex, OpenCode, and Hermes Agent settings, shared guidance, and commit workflow
 - [`eyrarchy`](https://github.com/peregrinus879/eyrarchy) - Personal Omarchy customizations: Bash overrides, Hyprland bindings, Neovim plugins, and Yazi
 - [`eyrwsl`](https://github.com/peregrinus879/eyrwsl) - Self-contained WSL Arch environment: terminal baseline plus Windows Terminal and clipboard integration
 
@@ -160,11 +160,14 @@ If the old clone is no longer available, `make clean` (section 3) removes recogn
 
 ## Native Herdr
 
-Launch Herdr independently with `herdr` or Omarchy's native `SUPER CTRL RETURN` binding. In a shell inside that session, navigate to the desired directory, then run `hdw <cc|cx|oc> [-c]` to create and focus a new workspace:
+Launch Herdr independently with `herdr` or Omarchy's native `SUPER CTRL RETURN` binding. In a shell inside that session, navigate to the desired directory, then run `hdw <cc|cx|oc|ha> [-c]` to create and focus a new workspace:
 
 - `cc` sends `claude`; `-c` uses `claude -c`.
 - `cx` sends `codex`; `-c` uses `codex resume --last`.
 - `oc` sends `opencode`; `-c` uses `opencode -c`.
+- `ha` sends `hermes`; `-c` uses `hermes -c`.
+
+Omarchy owns Hermes installation. Its CLI is available through `omarchy install hermes cli --now`, using mise's pipx backend and Python 3.13. Hermes Desktop is a separate optional package whose runtime supersedes the standalone mise CLI when installed. EyrAgents owns the default Hermes harness. `hdw` supplies no YOLO flag; Hermes continuation may restore its recorded cwd after launch.
 
 `hdw` uses the current physical directory, not an inferred Git root. AI occupies the full-height left column, Neovim the top-right and a shell the bottom-right, with equal columns, equally stacked right panes and AI focus. The caller may be in a populated tab or an inactive workspace, but its pane identity and selected-tab context must be valid. Every call creates a separate workspace, even in the same directory; change directory in a generated bottom-right shell and call again to open the next workspace. Bare `hdw` prints usage; outside-Herdr or invalid-context calls refuse.
 
@@ -172,7 +175,7 @@ Existing workspace/tab names and layouts stay intact, apart from normal global w
 
 Cooperating calls are serialized. Caller identity, the pre-creation workspace inventory, the new root's opaque terminal identity, exact membership and complete geometry are checked before tool input. Cleanup may close only proven new split panes before input, never any workspace, tab, root or original caller. A newly created workspace/root always remains for inspection on failure; possible input or uncertain ownership preserves remaining state. Inspect the reported original/new recovery context before manual action. This is not an atomic multi-RPC transaction.
 
-The `cc`/`cx`/`oc` selectors are arguments, not shell aliases. Stock Omarchy `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively, so stock `cx` is Claude Code while `hdw cx` is Codex; `ic`/`ix`/`icx` retain their stock `tdl` recipes. These aliases also remain available in `hdw`-created shells. `hdw` sends full commands without stock shortcut flags, but it is not an isolated profile: both launch paths load applicable EyrAgents settings. Stock Herdr/tmux functions, bindings and packages remain unchanged.
+The `cc`/`cx`/`oc`/`ha` selectors are arguments, not shell aliases. Stock Omarchy `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively, so stock `cx` is Claude Code while `hdw cx` is Codex; `ic`/`ix`/`icx` retain their stock `tdl` recipes. These aliases also remain available in `hdw`-created shells. `hdw` sends full commands without stock shortcut flags, but it is not an isolated profile: both launch paths load applicable EyrAgents settings. Stock Herdr/tmux functions, bindings and packages remain unchanged.
 
 ## Git Review
 
