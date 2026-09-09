@@ -17,7 +17,7 @@ hl.unbind("SUPER + SHIFT + ALT + X")  -- X Post
 
 -- Desktop apps; ChatGPT reuses the retired Calendar key
 o.bind("SUPER + SHIFT + A", "AppImages", "uwsm-app -- it.mijorus.gearlever")
-o.bind("SUPER + SHIFT + C", "ChatGPT", { launch = "chatgpt", focus = "^chatgpt$" })
+o.bind("SUPER + SHIFT + C", "ChatGPT (app)", { launch = "chatgpt", focus = "^chatgpt$" })
 
 -- Web apps (SUPER + ALT), using chords free in Omarchy defaults
 o.bind("SUPER + ALT + A", "Claude", { webapp = "https://claude.ai" })

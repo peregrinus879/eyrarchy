@@ -82,7 +82,7 @@ assert(bindings["SUPER + ALT + B"].description == "Basecamp")
 assert(bindings["SUPER + ALT + B"].action.webapp == "https://launchpad.37signals.com")
 assert(bindings["SUPER + ALT + C"].description == "ChatGPT (web)")
 assert(bindings["SUPER + ALT + C"].action.webapp == "https://chatgpt.com")
-assert(bindings["SUPER + SHIFT + C"].description == "ChatGPT")
+assert(bindings["SUPER + SHIFT + C"].description == "ChatGPT (app)")
 assert(bindings["SUPER + SHIFT + C"].action.launch == "chatgpt")
 assert(bindings["SUPER + SHIFT + C"].action.focus == "^chatgpt$")
 LUA

@@ -52,7 +52,7 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 - `monitors.lua` is tracked: the GU605C panel at `2560x1600@240`, scale 1.6, and `GDK_SCALE=2`. `hl.env` values reach the compositor and its direct spawns on reload; uwsm-launched clients pick them up at session start.
 - The twelve default web-app bindings (ChatGPT, Grok, Calendar, Email, New email, YouTube, WhatsApp, Google Messages, Google Photos, Google Maps, X, X Post) are retired via `hl.unbind`; the personal `SUPER ALT` web-app set replaces them (Claude, Basecamp, ChatGPT, GitHub, LinkedIn, CFI, M365 Copilot, Proton, Teams, WhatsApp, X, YouTube).
 - `SUPER SHIFT A` launches the AppImages manager, taking the key from the default ChatGPT web app.
-- `SUPER SHIFT C` launches the ChatGPT desktop app (`omarchy-install-ai-chatgpt`, launch-or-focus on class `chatgpt`), reusing the retired Calendar key. `SUPER ALT C` opens `https://chatgpt.com` as a web app, labeled `ChatGPT (web)` in the binding menu.
+- `SUPER SHIFT C` launches the ChatGPT desktop app (`omarchy-install-ai-chatgpt`, launch-or-focus on class `chatgpt`), reusing the retired Calendar key and labeled `ChatGPT (app)` in the binding menu. `SUPER ALT C` opens `https://chatgpt.com` as a web app, labeled `ChatGPT (web)`.
 - `SUPER ALT B` opens Basecamp at `https://launchpad.37signals.com`, the generic target used by the installed Basecamp desktop launcher; no account/project URL is embedded.
 - The native grouping controls remain unshadowed: `SUPER G` toggles window grouping, and `SUPER ALT G` moves the active window out of its group. Gmail has no personal shortcut.
 - The preinstalled app and TUI bindings (Music, Docker, Signal, Obsidian, Omawrite, Passwords, Herdr, Tmux) stay on Omarchy defaults.
