@@ -5,7 +5,7 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 ## Load Map
 
 - Claude Code loads this file through the root `CLAUDE.md` `@AGENTS.md` import; skills load on invocation only.
-- The `Makefile` is the single source of the package list (`scripts/prepare-stow.sh` consumes it); `references.txt` lists the reference clones `/omasync` needs, and the family union of those files owns `~/Projects/quarry`; `README.md` carries the human-facing setup, verification, and maintenance detail; script headers own local constraints.
+- The `Makefile` is the single source of the package list (`scripts/prepare-stow.sh` consumes it); `references.txt` lists the reference clones `/omasync` needs, and the family union of those files owns `~/Projects/quarry`. `README.md` is the overview; `docs/setup.md` owns installation/recovery and `docs/operations.md` owns usage, verification, and routine maintenance. `DEVIATIONS.md` owns architectural boundaries and intentional differences; script headers own local constraints. Link to each owner rather than repeating its procedures in the README.
 - `docs/maintenance.md` owns unresolved decisions, deferred work, active limitations, and dated revalidation evidence; read it before package removals, Omarchy updates or refreshes, or work on a deferred item. Prose describes current behavior; Git history owns provenance.
 - EyrAgents' canonical [Workstream Checkpoints](https://github.com/peregrinus879/eyragents/blob/main/agents/.agents/shared-guidance.md#workstream-checkpoints) rule owns local continuity. The primary keeps a lean ignored `.eyr-plans/<workstream>/checkpoint.md`, separate in-tool `audit/` and cross-vendor `spar/` artifacts, and removes each when no longer needed. Read current state on resume, compaction and session handoff; review agents remain read-only. Tracked `docs/handoff.md` carries concrete cross-host work through push/pull and is deleted or updated when that handoff is complete. Neither form transfers approval; no extra skill or completed archive is needed.
 
@@ -25,14 +25,14 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 - Git identity lives in the untracked per-host `~/.config/git/config.local`; `make verify` asserts that it resolves to a GitHub no-reply address without printing it.
 - Interactive Bash exports `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` and `OPENCODE_ENABLE_EXA=1` so terminal-launched OpenCode skips the Claude Code skill copies, reads `.agents/skills` natively, and exposes web search. EyrAgents owns OpenCode configuration; this repo owns the Omarchy host environment. Non-interactive launchers supply the same variables explicitly.
 - The `hypr` package carries personal Hyprland overrides only, loaded after the Omarchy defaults through the Omarchy-owned `~/.config/hypr/hyprland.lua` require chain: `bindings.lua` (the twelve default web-app bindings retired via `hl.unbind`, the personal `SUPER ALT` set and AppImages added), `monitors.lua` (display values), `input.lua` (us/ara layouts, natural scrolling), and `looknfeel.lua` (rounded corners, reduced gaps); no defaults are replicated (deviations documented in `DEVIATIONS.md`). Keep native `SUPER G`/`SUPER ALT G` grouping controls unshadowed; ChatGPT web uses `SUPER ALT C`, distinct from its desktop app on `SUPER SHIFT C`. `make verify` asserts every `hl.unbind` target against the installed defaults and fails on a personal chord that collides with a default not unbound above it.
-- Keep every intentional difference documented in `DEVIATIONS.md`; update `README.md`, `AGENTS.md`, and `DEVIATIONS.md` together when ownership, setup, or sync assumptions change.
+- Keep every intentional difference documented in `DEVIATIONS.md`; update the overview, agent invariants, and affected setup/operation guides together when ownership, setup, or sync assumptions change.
 
 ## Post-Change Verification
 
 - `ha` selects Hermes Agent: `hermes`, or `hermes -c` for continuation, which can restore a recorded cwd. Omarchy owns its specialised mise/PyPI CLI installer and optional Desktop runtime; EyrAgents owns the Hermes harness. This repository adds only the shared `hdw` selector and does not override the native installer or default-agent launcher.
 
 - Start a fresh shell and Neovim session after structural changes.
-- The full human checklist lives in `README.md` (Verify and Maintenance).
+- The human verification checklist and routine maintenance commands live in `docs/operations.md`; deployment and recovery live in `docs/setup.md`.
 
 ## Skills
 

@@ -34,14 +34,14 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
    - `y()` is additive (Yazi is not in Omarchy)
    - the sourced `hdw` twin against `default/bash/fns/herdr`: it stays additive, creating/focusing a new workspace in the current physical directory inside an already-running Herdr, with AI-left/Neovim-top-right/shell-bottom-right geometry and AI focus. Valid populated/inactive callers, repeated new workspaces and generated-shell chaining are supported; preserve existing names/layouts apart from global focus. Naming stays native, without `--label`; `cc`/`cx`/`oc`/`ha` are arguments sending full commands, with optional `-c`, not an isolated EyrAgents profile. No reuse/registry/startup/attach behavior. A change lands in EyrWSL in the same session (`make twins`)
    - stock Herdr/tmux functions and bindings remain unchanged, including `hdl`/`hdlm`; tmux stays installed with upstream-owned configuration. Custom `tdw` retirement does not authorize refreshing defaults or resetting sessions
-3. Compare `hypr/bindings.lua` against the installed defaults at `/usr/share/omarchy/default/hypr/bindings/` (`applications.lua` carries the app and web-app set) and the user seed at `/usr/share/omarchy/config/hypr/bindings.lua`; the shipped `omarchy` skill owns the binding API, inspection commands, and validation loop:
+3. Compare `hypr/.config/hypr/bindings.lua` against the installed defaults at `/usr/share/omarchy/default/hypr/bindings/` (`applications.lua` carries the app and web-app set) and the user seed at `/usr/share/omarchy/config/hypr/bindings.lua`; the shipped `omarchy` skill owns the binding API, inspection commands, and validation loop:
    - every `hl.unbind` target must still match a default chord, and personal chords must not collide with new defaults
    - verify live registration by description and modmask via `hyprctl binds`; Omarchy registers Lua bindings as opaque `__lua` dispatchers, so exec strings never appear there
    - the file stays personal overrides only; defaults are never replicated
    - `make verify` runs `scripts/check-bindings.sh` for the unbind-target and collision assertions
-4. Compare `yazi/yazi.toml` against official Yazi docs, and the `nvim/` plugin specs against `obsidian.nvim/` and the render-markdown.nvim README
+4. Compare `yazi/.config/yazi/yazi.toml` against official Yazi docs, and the `nvim/` plugin specs against `obsidian.nvim/` and the render-markdown.nvim README
 5. App parity sweep: diff `pacman -Qe` against the installed default manifest (`/usr/share/omarchy/install/omarchy-base.packages` plus hardware conditionals) and the optional installers (`omarchy-install-*`); classify each extra as personal, optional-installed, or retired survivor, and account for provider resolution (`extra/neovim` satisfies the `nvim` entry)
-6. Tool-path integrity: every managed CLI in `~/.local/bin` (the `omarchy-mise-install` lines in `/usr/share/omarchy/install/user/mise.sh`: claude, codex, opencode, gemini, copilot, gh, and the rest) must be the Omarchy mise wrapper; `omarchy-refresh-applications` deletes and rewrites them through `omarchy-mise-install`, so verify with `head -3` on each and `mise ls --current`. Hand-installed scripts and the EyrAgents spar links are unmanaged and survive. Native install stores are removable only after confirming the running binary path via `/proc/<pid>/exe`
+6. Tool-path integrity: compare Omarchy-owned launchers in `~/.local/bin` with the installed ordinary and specialised installer definitions, then check `mise ls --current` and actual command resolution. Hermes has its own CLI installer and optional Desktop takeover, so do not classify every launcher as the ordinary wrapper. EyrAgents workflow executables live under `~/.agents/skills/*/scripts`, separately from these launchers. Review any replacement or native-store removal against its actual owner and running executable; directory location alone is not disposal authority
 7. Webapp entries: compare the webapp launchers in `~/.local/share/applications` against the current Omarchy default set and remove stale ones with `omarchy-webapp-remove`; personal bindings launch by URL and do not depend on desktop entries
 8. Cross-repo coordination: read the sibling ledgers for items assigned to this repo and for stale entries describing this host's environment
 9. For each difference, classify it:
@@ -51,12 +51,12 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 10. Check `git log --format="%h %ad %s" --date=short -- <file>` on the relevant reference repo when you need to determine when a difference was introduced
 11. Cross-check differences against `DEVIATIONS.md`. If a difference is not documented there, treat it as a likely upstream change that needs review
 12. Apply new upstream additions and changes where they belong in the personal customizations
-13. Update `README.md`, `AGENTS.md`, and `DEVIATIONS.md` when package ownership, setup steps, or documented deviations change
+13. Update each affected documentation owner: README overview, AGENTS invariants, DEVIATIONS rationale, `docs/setup.md` procedures, and `docs/operations.md` usage/verification
 14. Summarize which changes were adopted, rejected, or intentionally kept different
 
 ## Completion Checks
 
-- `README.md`, `AGENTS.md`, and `DEVIATIONS.md` reflect any ownership, setup, or workflow changes
+- The overview, invariants, deviations, and affected setup/operation guides reflect the change without duplicating detailed procedures
 - Every retained difference is still documented in `DEVIATIONS.md`
 - For custom `tdw` retirement, use guarded `make clean` then `make restow`; `make verify` checks the exact retired endpoint read-only even after its source leaves Git. Preserve/refuse foreign links, regular/special entries and unsafe parents; preserve real directories and user state. Do not broaden retirement into a home cleaner or change restow's ordinary semantics
 - For twin changes, `make twins` checks local worktrees; after both commits exist, `twins-pair` checks the exact full `SELF_COMMIT`/`PEER_COMMIT` pair at `SIBLING`. Inputs remain literal data and peer code never executes. Hosted final-pair evidence must name the final published commits; earlier-peer CI is not a substitute or publication authorization
