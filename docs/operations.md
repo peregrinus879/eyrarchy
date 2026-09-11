@@ -23,6 +23,24 @@ Cooperating calls are serialized. Caller identity, the pre-creation workspace in
 
 The `cc`/`cx`/`oc`/`ha` selectors are arguments, not shell aliases. Stock Omarchy `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively, so stock `cx` is Claude Code while `hdw cx` is Codex; `ic`/`ix`/`icx` retain their stock `tdl` recipes. These aliases also remain available in `hdw`-created shells. `hdw` sends full commands without stock shortcut flags, but it is not an isolated profile: both launch paths load applicable EyrAgents settings. Stock Herdr/tmux functions, bindings and packages remain unchanged.
 
+## GitHub Access
+
+After [host-local setup](setup.md#github-access), open a fresh normal terminal in this clone and check:
+
+```bash
+command -v gh
+git remote get-url --push --all origin
+gh repo view peregrinus879/eyrarchy --json nameWithOwner,viewerPermission
+GIT_TERMINAL_PROMPT=0 GH_PROMPT_DISABLED=1 \
+  git -c credential.interactive=false ls-remote --exit-code --refs origin refs/heads/main
+```
+
+Expect the canonical HTTPS origin, intended repository/access level, and a branch ID without another credential prompt. Public Git refs can be read anonymously; that result alone does not establish authenticated Git writes. H checks helper configuration locally, without displaying credentials, and the next independently approved publication supplies real write-path evidence.
+
+At the next H-chosen reboot, repeat these checks after normal boot/login, before manually unlocking a keyring or refreshing credentials. Start new Claude Code, Codex, OpenCode and Hermes processes from that fresh shell. Confirm prompt absence explicitly, including normal browser startup; a check repaired in one terminal does not establish startup persistence. Keep missing evidence in [maintenance](maintenance.md#deferred-work).
+
+Authentication readiness is separate from EyrAgents' exact commit approval, exact Push selection, agent execution and verification. Codex retains its restrictions and hands publication to a separately launched network-capable primary with fresh approval. Credential access carries the account's permissions, not read-only isolation. A locked store, expired login or wrong account requires H-local recovery through the standard CLI/native UI. Neither TLS/host-trust weakening nor dumping tokens is a recovery step. Follow the setup command's host-local configuration target when refreshing Git helper settings after an update.
+
 ## Git Review
 
 After stowing, start a fresh Neovim session once to load `git-review.lua`. `Space g d` shows staged and unstaged hunks, `Space g D` compares against origin, and `Space g s` shows status including untracked files. Each invocation uses the current file/directory's Git repository or the selected Neo-tree item, falling back to the displayed tree root when no item path exists. Symlink targets and linked worktrees are supported; switching files between repositories switches the review target without changing any editor directory.

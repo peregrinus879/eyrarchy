@@ -46,6 +46,8 @@ Inside an existing Herdr session, change to your project and run `hdw ha` to ope
 
 See [Native Herdr](docs/operations.md#native-herdr) for layout, selectors, continuation, and recovery behavior, and [Git review](docs/operations.md#git-review) for the contextual Neovim mappings.
 
+[GitHub setup](docs/setup.md#github-access) uses Omarchy's GitHub CLI and HTTPS. [Operations](docs/operations.md#github-access) covers fresh-client and reboot checks. EyrAgents owns exact commit approval, Push selection, agent execution and verification.
+
 ## Verify
 
 `make lint check` runs repository checks. On the Omarchy host, `make verify` also checks deployed configuration and `make twins` compares shared files with EyrWSL. The [operations guide](docs/operations.md#verify) covers fresh-session checks, CI, and exact committed twin pairs.
