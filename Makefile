@@ -29,14 +29,18 @@ TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   tests/update-references.sh \
   tests/git-review.sh \
   tests/hdw.sh \
-  tests/fixtures/herdr
+  tests/fixtures/herdr \
+  docs/cheatsheet/build.py \
+  docs/cheatsheet/reference.json \
+  docs/cheatsheet/template.html \
+  docs/cheatsheet/README.md
 
 BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*)
 LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.lua)
 TOML_FILES := yazi/.config/yazi/yazi.toml
 OMARCHY_HYPR := /usr/share/omarchy/default/hypr
 
-.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins twins-pair verify clean recover refs
+.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins twins-pair verify clean recover refs cheatsheet
 
 # Deployment goals and their guards must never race, including `make -j clean restow`.
 .NOTPARALLEL:
@@ -73,6 +77,7 @@ help:
 	@echo "  clean     Guarded stow preparation: owned folds, dangling clone links and exact retired links; regular files are preserved"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone and fast-forward listed references to exact upstream parity; report and keep stale clones"
+	@echo "  cheatsheet  Rebuild the offline hdw workflow guide in docs/hdw.html"
 
 # Host-bound targets refuse elsewhere, and a managed endpoint that is a link
 # must resolve into this clone so a reference clone never redeploys the
@@ -105,6 +110,7 @@ lint:
 # fixture suites. Needs no Omarchy host, stowed links, or Hyprland session.
 # Fail closed: a missing verifier binary must fail the run, not skip a check.
 check:
+	python3 docs/cheatsheet/build.py --profile eyrarchy --check
 	@for tool in luac python3 git stow; do \
 	  command -v "$$tool" > /dev/null || { echo "FAIL: required verifier '$$tool' is missing"; exit 1; }; \
 	done
@@ -219,3 +225,6 @@ recover: require-clone clean restow
 # parity, and reports unlisted clones without deleting them.
 refs:
 	@bash scripts/update-references.sh
+
+cheatsheet:
+	python3 docs/cheatsheet/build.py --profile eyrarchy
