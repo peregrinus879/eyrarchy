@@ -46,7 +46,7 @@ Inside an existing Herdr session, change to your project and run `hdw ha` to ope
 
 See [Native Herdr](docs/operations.md#native-herdr) for layout, selectors, continuation, and recovery behavior, and [Git review](docs/operations.md#git-review) for the contextual Neovim mappings.
 
-Open the [hdw Workflow Guide](docs/hdw.html) in a browser for searchable keys, commands, launch recipes and host notes across the whole workspace. It is a self-contained offline file; on GitHub, download the raw HTML first.
+Open the [Workspace Guide](docs/workspace-guide.html) in a browser for searchable keys, commands, launch recipes and host notes across the whole workspace. It is a self-contained offline file; on GitHub, download the raw HTML first.
 
 [GitHub setup](docs/setup.md#github-access) uses Omarchy's GitHub CLI and HTTPS. [Operations](docs/operations.md#github-access) covers fresh-client and reboot checks. EyrAgents owns exact commit approval, Push selection, agent execution and verification.
 
@@ -60,7 +60,7 @@ Open the [hdw Workflow Guide](docs/hdw.html) in a browser for searchable keys, c
 | --- | --- |
 | Install, move, or recover the deployment | [Setup](docs/setup.md) |
 | Use helpers, verify changes, or perform routine maintenance | [Operations](docs/operations.md) |
-| Find hdw workspace keys, commands and everyday workflows | [Offline workflow guide](docs/hdw.html) |
+| Find workspace keys, commands and everyday workflows | [Offline workflow guide](docs/workspace-guide.html) |
 | Understand ownership and intentional differences | [Deviations](DEVIATIONS.md) |
 | Find unresolved issues and pending work | [Maintenance ledger](docs/maintenance.md) |
 | Reconcile with upstream Omarchy | [omasync](.agents/skills/omasync/SKILL.md) |

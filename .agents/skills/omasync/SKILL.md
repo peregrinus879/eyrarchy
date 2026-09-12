@@ -22,7 +22,7 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 - Use this skill when Omarchy or a reference repo changed materially, including after an Omarchy update or a config refresh ran.
 - Use this skill when personal customization scope or behavior changed materially.
 - Use this skill when you suspect undocumented drift between this repo and its references.
-- Review the affected hdw guide sections after a binding/command change or a relevant application/plugin update, including inherited defaults that changed without an owned keymap-file diff.
+- Review the affected workspace guide sections after a binding/command change or a relevant application/plugin update, including inherited defaults that changed without an owned keymap-file diff.
 - Use this skill before broad sync-oriented doc updates.
 
 ## Workflow
@@ -52,13 +52,13 @@ The installed defaults the machine actually runs live under `/usr/share/omarchy`
 10. Check `git log --format="%h %ad %s" --date=short -- <file>` on the relevant reference repo when you need to determine when a difference was introduced
 11. Cross-check differences against `DEVIATIONS.md`. If a difference is not documented there, treat it as a likely upstream change that needs review
 12. Apply new upstream additions and changes where they belong in the personal customizations
-13. Update each affected documentation owner: README overview, AGENTS invariants, DEVIATIONS rationale, `docs/setup.md` procedures, and `docs/operations.md` usage/verification. Reconcile the hdw guide through `docs/cheatsheet/README.md` (Change-coupled maintenance): review added, changed and removed bindings/commands in the affected host/default layers, including Herdr, the outer terminal, Neovim/Neo-tree/vault plugins, Bash and Yazi. Compare installed/version-matched defaults even when no personal mapping file changed; route AI-client interface changes through EyrAgents' `/eyrsync`. Update affected entries, recipes, routing notes and source evidence together, then regenerate both companion guides. A generator/twin pass does not establish semantic or live-keymap accuracy
+13. Update each affected documentation owner: README overview, AGENTS invariants, DEVIATIONS rationale, `docs/setup.md` procedures, and `docs/operations.md` usage/verification. Reconcile the workspace guide through `docs/workspace-guide-src/README.md` (Change-coupled maintenance): review added, changed and removed bindings/commands in the affected host/default layers, including Herdr, the outer terminal, Neovim/Neo-tree/vault plugins, Bash and Yazi. Compare installed/version-matched defaults even when no personal mapping file changed; route AI-client interface changes through EyrAgents' `/eyrsync`. Update affected entries, recipes, routing notes and source evidence together, then regenerate both companion guides. A generator/twin pass does not establish semantic or live-keymap accuracy
 14. Summarize which changes were adopted, rejected, or intentionally kept different
 
 ## Completion Checks
 
 - The overview, invariants, deviations, and affected setup/operation guides reflect the change without duplicating detailed procedures
-- Every affected hdw guide section has been reconciled with the owning configuration/source/help, including additions and removals. Both generated outputs are current and the shared authoring twins agree. Unchanged behavior is stated in the change review; unavailable/unauthorized sibling or actual-host checks remain explicit incomplete work at the maintenance owner, not a fabricated completed guide review
+- Every affected workspace guide section has been reconciled with the owning configuration/source/help, including additions and removals. Both generated outputs are current and the shared authoring twins agree. Unchanged behavior is stated in the change review; unavailable/unauthorized sibling or actual-host checks remain explicit incomplete work at the maintenance owner, not a fabricated completed guide review
 - Every retained difference is still documented in `DEVIATIONS.md`
 - For custom `tdw` retirement, use guarded `make clean` then `make restow`; `make verify` checks the exact retired endpoint read-only even after its source leaves Git. Preserve/refuse foreign links, regular/special entries and unsafe parents; preserve real directories and user state. Do not broaden retirement into a home cleaner or change restow's ordinary semantics
 - For twin changes, `make twins` checks local worktrees; after both commits exist, `twins-pair` checks the exact full `SELF_COMMIT`/`PEER_COMMIT` pair at `SIBLING`. Inputs remain literal data and peer code never executes. Hosted final-pair evidence must name the final published commits; earlier-peer CI is not a substitute or publication authorization
