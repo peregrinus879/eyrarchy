@@ -40,7 +40,7 @@ LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.
 TOML_FILES := yazi/.config/yazi/yazi.toml
 OMARCHY_HYPR := /usr/share/omarchy/default/hypr
 
-.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins twins-pair verify clean recover refs workspace-guide
+.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins twins-pair verify clean recover refs refs-plan workspace-guide
 
 # Deployment goals and their guards must never race, including `make -j clean restow`.
 .NOTPARALLEL:
@@ -77,6 +77,7 @@ help:
 	@echo "  clean     Guarded stow preparation: owned folds, dangling clone links and exact retired links; regular files are preserved"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone and fast-forward listed references to exact upstream parity; report and keep stale clones"
+	@echo "  refs-plan Preview reference maintenance for this repo and its selected host peer"
 	@echo "  workspace-guide  Rebuild the offline workspace guide in docs/workspace-guide.html"
 
 # Host-bound targets refuse elsewhere, and a managed endpoint that is a link
@@ -224,7 +225,10 @@ recover: require-clone clean restow
 # repoints moved GitHub remotes, fast-forwards listed clones to exact upstream
 # parity, and reports unlisted clones without deleting them.
 refs:
-	@bash scripts/update-references.sh
+	@REFERENCE_PEER="$$SIBLING" bash scripts/update-references.sh
+
+refs-plan:
+	@REFERENCE_PEER="$$SIBLING" bash scripts/update-references.sh --dry-run
 
 workspace-guide:
 	python3 docs/workspace-guide-src/build.py --profile eyrarchy

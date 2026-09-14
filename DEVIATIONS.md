@@ -38,8 +38,7 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 ### Bash
 
 - `.bashrc` opens with the upstream seed preamble (`/usr/share/omarchy/default/bashrc`), kept verbatim, then adds personal overrides below; Omarchy writes to `.bashrc` reach the repo file through the stow symlink.
-- Interactive Bash exports `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` and `OPENCODE_ENABLE_EXA=1` so terminal-launched OpenCode skips the Claude Code skill copies, reads `.agents/skills` natively, and exposes its configured web-search tool. EyrAgents owns OpenCode configuration; this repo owns the Omarchy host environment. Non-interactive launchers supply both variables explicitly.
-- Omarchy's six AI launch aliases `c`, `cx`, `cy`, `ic`, `ix`, and `icx` load unchanged, without an `unalias` override. Stock `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively; `ic`/`ix`/`icx` keep their stock `tdl` recipes. The `cc`/`cx`/`oc`/`ha` selectors belong only to `hdw`, which sends full tool commands without stock shortcut flags; stock `cx` means Claude Code, while `hdw cx` means Codex. Both launch paths load applicable EyrAgents settings, including inside generated shells; `hdw` is not an isolated profile.
+- Omarchy's six AI launch aliases `c`, `cx`, `cy`, `ic`, `ix`, and `icx` load unchanged, without an `unalias` override. Stock `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively; `ic`/`ix`/`icx` keep their stock `tdl` recipes. The `cc`/`cx`/`oc`/`ha` selectors belong only to `hdw`, which sends full tool commands without stock shortcut flags; stock `cx` means Claude Code, while `hdw cx` means Codex. Both launch paths use normal client configuration, including inside generated shells; `hdw` is not an isolated profile.
 - `y()` is added for Yazi cd-on-exit support. Yazi is not part of Omarchy.
 - `hdw <cc|cx|oc|ha> [-c]` creates and focuses a new workspace inside an already-running Herdr using the caller's current physical directory, not an inferred Git root. A populated tab or inactive source workspace is allowed with valid pane identity and selected-tab context; repeated calls and generated bottom-right-shell chaining each create another workspace. AI stays full-height left, Neovim above a shell equally stacked right, with equal columns and AI focus. Commands are `claude`, `codex`, `opencode`, or `hermes`; `-c` uses `claude -c`, `codex resume --last`, `opencode -c`, or `hermes -c`. This geometry intentionally differs from Omarchy's `hdl` recipe.
 - Existing names/layouts remain untouched apart from normal global workspace focus. New naming stays with Herdr, with no `--label` or rename/metadata writes; the new default tab displays positional `1`. Bare `hdw` is usage. There is no workspace reuse, server startup, client attachment or roots registry. Old state/recovery files, including `${XDG_STATE_HOME:-$HOME/.local/state}/hdw/roots`, remain untouched and unused. Native Herdr controls own workspace/tab navigation.
@@ -82,6 +81,6 @@ The following do **not** belong in EyrArcHy:
 
 - Shared Linux baseline configs (out of scope)
 - WSL or Windows-specific behavior (belong in EyrWSL)
-- AI agent harness configuration (belongs in EyrAgents)
+- AI-client configuration and agent workflow policy
 - The vault itself, its scripts, or its sync (belong to the vault project)
 - Omarchy system bindings, window rules, or desktop defaults (belong in Omarchy)

@@ -24,7 +24,7 @@ Omarchy owns the desktop client installers and mise wrappers. Hermes has a speci
 omarchy install hermes cli --now
 ```
 
-It uses mise's pipx backend with Python 3.13. Hermes Desktop is a separate optional installation whose runtime supersedes the standalone mise CLI. EyrArcHy supplies the workspace selector; [EyrAgents setup](https://github.com/peregrinus879/eyragents/blob/main/docs/setup.md) owns the optional shared harness and sign-in guidance.
+It uses mise's pipx backend with Python 3.13. Hermes Desktop is a separate optional installation whose runtime supersedes the standalone mise CLI. EyrArcHy supplies the workspace selector. Use the installed client’s native sign-in flow; client configuration is managed independently.
 
 ### 2. Clone
 
@@ -132,7 +132,7 @@ git remote set-url origin https://github.com/peregrinus879/eyrarchy.git
 git remote get-url --push --all origin
 ```
 
-Preserve forks, custom remotes and separately configured push URLs for their own review. Repeat the corresponding exact URL change in H's EyrAgents and EyrWSL clones when intended; do not add broad URL rewrites. The `gh` protocol preference does not rewrite existing origins. Complete the [fresh-client/reboot checks](operations.md#github-access) before claiming routine readiness. References: [login/storage](https://cli.github.com/manual/gh_auth_login), [Git helper setup](https://cli.github.com/manual/gh_auth_setup-git), and [`GH_PATH`](https://cli.github.com/manual/gh_help_environment).
+Preserve forks, custom remotes and separately configured push URLs for their own review. Review other repositories individually when their remotes also need migration; do not add broad URL rewrites. The `gh` protocol preference does not rewrite existing origins. Complete the [fresh-client/reboot checks](operations.md#github-access) before claiming routine readiness. References: [login/storage](https://cli.github.com/manual/gh_auth_login), [Git helper setup](https://cli.github.com/manual/gh_auth_setup-git), and [`GH_PATH`](https://cli.github.com/manual/gh_help_environment).
 
 ### Unstow
 

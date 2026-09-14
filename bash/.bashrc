@@ -10,11 +10,6 @@ source "$OMARCHY_PATH/default/bash/rc"
 
 # Personal overrides
 
-# Skip the Claude Code skill copies (OpenCode reads .agents/skills natively) and
-# expose its configured web-search tool
-export OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1
-export OPENCODE_ENABLE_EXA=1
-
 # Yazi cd-on-exit (Yazi is not part of Omarchy)
 y() {
   local tmp cwd

@@ -35,6 +35,6 @@ env -i PATH="$PATH" HOME="$TMP" HISTFILE=/dev/null ROOT="$ROOT" OMARCHY_PATH="$T
     for shortcut in cc oc; do
       if alias "$shortcut" >/dev/null 2>&1; then exit 1; fi
     done
-    [[ $OPENCODE_DISABLE_CLAUDE_CODE_SKILLS == 1 && $OPENCODE_ENABLE_EXA == 1 ]]
+    [[ ! -v OPENCODE_DISABLE_CLAUDE_CODE_SKILLS && ! -v OPENCODE_ENABLE_EXA ]]
   ' >"$TMP/result" 2>&1 || { cat "$TMP/result" >&2; exit 1; }
-printf 'ok:   Bash preserves stock AI shortcuts, adds hdw without selector aliases, and retains personal exports/Yazi\n'
+printf 'ok:   Bash preserves stock shortcuts and Yazi/hdw without injecting AI-client configuration\n'
