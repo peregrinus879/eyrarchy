@@ -29,18 +29,14 @@ TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   tests/update-references.sh \
   tests/git-review.sh \
   tests/hdw.sh \
-  tests/fixtures/herdr \
-  docs/workspace-guide-src/build.py \
-  docs/workspace-guide-src/reference.json \
-  docs/workspace-guide-src/template.html \
-  docs/workspace-guide-src/README.md
+  tests/fixtures/herdr
 
 BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*)
 LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.lua)
 TOML_FILES := yazi/.config/yazi/yazi.toml
 OMARCHY_HYPR := /usr/share/omarchy/default/hypr
 
-.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins twins-pair verify clean recover refs refs-plan workspace-guide
+.PHONY: help require-host require-clone stow unstow dry-run restow lint check test twins twins-pair verify clean recover refs refs-plan
 
 # Deployment goals and their guards must never race, including `make -j clean restow`.
 .NOTPARALLEL:
@@ -78,7 +74,6 @@ help:
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone and fast-forward listed references to exact upstream parity; report and keep stale clones"
 	@echo "  refs-plan Preview reference maintenance for this repo and its selected host peer"
-	@echo "  workspace-guide  Rebuild the offline workspace guide in docs/workspace-guide.html"
 
 # Host-bound targets refuse elsewhere, and a managed endpoint that is a link
 # must resolve into this clone so a reference clone never redeploys the
@@ -111,7 +106,6 @@ lint:
 # fixture suites. Needs no Omarchy host, stowed links, or Hyprland session.
 # Fail closed: a missing verifier binary must fail the run, not skip a check.
 check:
-	python3 docs/workspace-guide-src/build.py --profile eyrarchy --check
 	@for tool in luac python3 git stow; do \
 	  command -v "$$tool" > /dev/null || { echo "FAIL: required verifier '$$tool' is missing"; exit 1; }; \
 	done
@@ -229,6 +223,3 @@ refs:
 
 refs-plan:
 	@REFERENCE_PEER="$$SIBLING" bash scripts/update-references.sh --dry-run
-
-workspace-guide:
-	python3 docs/workspace-guide-src/build.py --profile eyrarchy

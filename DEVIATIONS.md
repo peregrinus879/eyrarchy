@@ -20,6 +20,8 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 
 ## Reference Sources
 
+The [full workspace guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) is authored and built in EyrAgents so host and AI controls have one user-facing reference. EyrArcHy and EyrWSL own their host facts and implementation-twin contract; `/omasync` includes authorized guide reconciliation in EyrAgents. Each repository builds and deploys independently.
+
 - [omacom/omarchy](https://github.com/omacom/omarchy) - main Omarchy repo for defaults, themes, and desktop configs
 - [The Omarchy Manual](https://learn.omacom.io/2/the-omarchy-manual) - setup guides, keybindings, workflows
 - [obsidian-nvim/obsidian.nvim](https://github.com/obsidian-nvim/obsidian.nvim) - upstream for the vault plugin spec
