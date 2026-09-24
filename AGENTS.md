@@ -34,4 +34,4 @@ Personal [Omarchy](https://github.com/omacom/omarchy) dotfiles managed with [GNU
 
 ## Skills
 
-- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; its source is `.agents/skills/omasync/SKILL.md`, the Agent Skills standard's home, with a tracked symlink under `.claude/skills` for Claude Code; OpenCode reads `.agents/skills` natively
+- `/omasync` - sync personal customizations against Omarchy references, installed defaults, and official docs; its source is `.agents/skills/omasync/SKILL.md`, the Agent Skills standard's home, with a tracked directory link under `.claude/skills`, the only project skill location Claude Code reads; OpenCode reads `.agents/skills` natively
