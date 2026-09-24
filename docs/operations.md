@@ -12,7 +12,7 @@ Open the self-contained [EyrAgents Workspace Guide](https://github.com/peregrinu
 xdg-open "$HOME/Projects/eyrie/eyragents/docs/workspace-guide.html"
 ```
 
-Daily and All views cover Herdr, the four AI clients, Neovim/Neo-tree, Git review, vault notes, Bash tools and Yazi. The host profile selects outer-terminal controls and host-specific notes. Search, saved keys, copyable launcher commands and printing work offline; source links open online references when selected.
+Daily and All views cover Herdr, the AI clients, Neovim/Neo-tree, Git review, vault notes, Bash tools and Yazi. The host profile selects outer-terminal controls and host-specific notes. Search, saved keys, copyable launcher commands and printing work offline; source links open online references when selected.
 
 Adjust the path for a differently located EyrAgents clone, or download the raw HTML from GitHub. EyrAgents owns the guide's source and [maintenance instructions](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide-src/README.md); run `make workspace-guide` and `make check` there to rebuild and check the single output. Host `make twins` protects shared implementation files.
 
@@ -20,14 +20,12 @@ Guide reconciliation is part of every in-scope binding or command addition, chan
 
 ## Native Herdr
 
-Launch Herdr independently with `herdr` or Omarchy's native `SUPER CTRL RETURN` binding. In a shell inside that session, navigate to the desired directory, then run `hdw <cc|cx|oc|ha> [-c]` to create and focus a new workspace:
+Launch Herdr independently with `herdr` or Omarchy's native `SUPER CTRL RETURN` binding. In a shell inside that session, navigate to the desired directory, then run `hdw <cc|oc> [-c]` to create and focus a new workspace:
 
 - `cc` sends `claude`; `-c` uses `claude -c`.
-- `cx` sends `codex`; `-c` uses `codex resume --last`.
 - `oc` sends `opencode`; `-c` uses `opencode -c`.
-- `ha` sends `hermes`; `-c` uses `hermes -c`.
 
-See [AI client setup](setup.md#ai-clients) for Omarchy's Hermes installer and Desktop runtime choice. `hdw` supplies no YOLO flag; Hermes continuation may restore its recorded cwd after launch.
+Omarchy installs the clients ([AI client setup](setup.md#ai-clients)); `hdw` supplies no YOLO flag.
 
 Claude Code continuation follows Claude Code's own session ownership. A session sent to the background with `/bg`, or with `Move to background and exit` in the exit dialog shown while background tasks run, continues under Claude Code's daemon, independent of Herdr windows and the Herdr server. While it runs, `claude -c` refuses with `Your most recent conversation is running in the background (session <uuid>)`; the short id is the first eight characters, and `claude agents` lists them. In the root pane `hdw` opened, `claude attach <id>` reopens the session with its background tasks intact. `claude stop <id>` followed by `claude -c` continues the same session in the foreground and ends its background tasks.
 
@@ -37,7 +35,7 @@ Existing workspace/tab names and layouts stay intact, apart from normal global w
 
 Cooperating calls are serialized. Caller identity, the pre-creation workspace inventory, the new root's opaque terminal identity, exact membership and complete geometry are checked before tool input. Cleanup may close only proven new split panes before input, never any workspace, tab, root or original caller. A newly created workspace/root always remains for inspection on failure; possible input or uncertain ownership preserves remaining state. Inspect the reported original/new recovery context before manual action. This is not an atomic multi-RPC transaction.
 
-The `cc`/`cx`/`oc`/`ha` selectors are arguments, not shell aliases. Stock Omarchy `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively, so stock `cx` is Claude Code while `hdw cx` is Codex; `ic`/`ix`/`icx` retain their stock `tdl` recipes. These aliases also remain available in `hdw`-created shells. `hdw` sends full commands without stock shortcut flags, but it is not an isolated profile: both launch paths use normal client configuration. Stock Herdr/tmux functions, bindings and packages remain unchanged.
+The `cc`/`oc` selectors are arguments, not shell aliases. Stock Omarchy `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively, so stock `cx` and `hdw cc` both start Claude Code; `ic`/`ix`/`icx` retain their stock `tdl` recipes. These aliases also remain available in `hdw`-created shells. `hdw` sends full commands without stock shortcut flags, but it is not an isolated profile: both launch paths use normal client configuration. Stock Herdr/tmux functions, bindings and packages remain unchanged.
 
 ## GitHub Access
 
@@ -53,7 +51,7 @@ GIT_TERMINAL_PROMPT=0 GH_PROMPT_DISABLED=1 \
 
 Expect the canonical HTTPS origin, intended repository/access level, and a branch ID without another credential prompt. Public Git refs can be read anonymously; that result alone does not establish authenticated Git writes. H checks helper configuration locally, without displaying credentials, and the next independently approved publication supplies real write-path evidence.
 
-At the next H-chosen reboot, repeat these checks after normal boot/login, before manually unlocking a keyring or refreshing credentials. Start new Claude Code, Codex, OpenCode and Hermes processes from that fresh shell. Confirm prompt absence explicitly, including normal browser startup; a check repaired in one terminal does not establish startup persistence. Keep missing evidence in [maintenance](maintenance.md#deferred-work).
+At the next H-chosen reboot, repeat these checks after normal boot/login, before manually unlocking a keyring or refreshing credentials. Start new Claude Code and OpenCode processes from that fresh shell. Confirm prompt absence explicitly, including normal browser startup; a check repaired in one terminal does not establish startup persistence. Keep missing evidence in [maintenance](maintenance.md#deferred-work).
 
 Authentication establishes account access, not authorization for repository mutations. Credential access carries the account's permissions, not read-only isolation. A locked store, expired login or wrong account requires H-local recovery through the standard CLI/native UI. Neither TLS/host-trust weakening nor dumping tokens is a recovery step. Follow the setup command's host-local configuration target when refreshing Git helper settings after an update.
 
@@ -73,7 +71,7 @@ After stowing or changing owned packages:
 - Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages: `lint`, `check`, and `twins`, then retired-endpoint absence, live source existence, the stowed symlinks (compared by resolved path), every managed parent being a real directory, the Git identity (it must resolve to a GitHub no-reply address; the value is not printed), every `hl.unbind` target and personal chord in `bindings.lua` against the installed Omarchy defaults, and Hyprland config errors.
 - Confirm `SUPER G` toggles window grouping and `SUPER ALT G` moves the active window out of its group. `SUPER ALT B` opens Basecamp, `SUPER ALT C` opens ChatGPT web, and `SUPER SHIFT C` launches or focuses the ChatGPT desktop app. Gmail has no replacement shortcut; [Hyprland deviations](../DEVIATIONS.md#hyprland) own the launch targets and default-key exceptions.
 - Start a fresh shell and confirm `type y` shows the Yazi cd-on-exit function.
-- Start a fresh shell and confirm `alias c cx cy ic ix icx` matches Omarchy's installed defaults; `alias claude` should still report no alias. Stock shortcuts keep their own launch flags and normal client configuration; do not confuse stock `cx` with the `hdw cx` argument.
+- Start a fresh shell and confirm `alias c cx cy ic ix icx` matches Omarchy's installed defaults; `alias claude` should still report no alias. Stock shortcuts keep their own launch flags and normal client configuration.
 - Confirm `type hdw` shows the new-workspace helper and a fresh shell no longer loads custom `tdw`. In a disposable Herdr session/project, check the [Native Herdr](#native-herdr) layout, full agent/continuation commands, native names and AI focus. Repeated calls, including from a populated caller, a valid inactive source workspace and a generated bottom-right shell, must each create a new workspace; existing names/layouts must stay intact apart from global focus. Bare invocation shows usage; outside-Herdr and invalid-context calls refuse. Do not experiment in an existing working session.
 - On helper failure, inspect the original/new pane/tab/workspace context before manual cleanup. The new workspace/root must remain; only verified new split panes may be removed before possible input, never any workspace/tab/root/caller. Never delete unfamiliar panes or retained state/recovery files. Omarchy's stock Herdr/tmux functions, configuration and launch bindings remain upstream-owned and unchanged.
 - `hl.env` values in the tracked hypr files reach the compositor on reload but reach uwsm-launched clients only at session start; after first adopting the hypr package on a running session, log out and back in once.

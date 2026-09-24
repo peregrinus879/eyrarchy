@@ -43,7 +43,7 @@ Use the [setup and recovery guide](docs/setup.md) on a working Omarchy desktop. 
 
 ## Usage
 
-Inside an existing Herdr session, change to your project and run `hdw ha` to open Hermes, Neovim, and a shell in a new workspace. `hdw ha -c` continues Hermes; `cc`, `cx`, and `oc` select the other clients.
+Inside an existing Herdr session, change to your project and run `hdw cc` to open Claude Code, Neovim, and a shell in a new workspace. `hdw cc -c` continues Claude Code; `oc` selects OpenCode.
 
 See [Native Herdr](docs/operations.md#native-herdr) for layout, selectors, continuation, and recovery behavior, and [Git review](docs/operations.md#git-review) for the contextual Neovim mappings.
 

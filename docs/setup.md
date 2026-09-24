@@ -18,13 +18,7 @@ sudo pacman -Syu --needed yazi
 
 ### AI Clients
 
-Omarchy owns the desktop client installers and mise wrappers. Hermes has a specialised CLI installer:
-
-```bash
-omarchy install hermes cli --now
-```
-
-It uses mise's pipx backend with Python 3.13. Hermes Desktop is a separate optional installation whose runtime supersedes the standalone mise CLI. EyrArcHy supplies the workspace selector. Use the installed client’s native sign-in flow; client configuration is managed independently.
+Omarchy owns the desktop client installers and mise wrappers. EyrArcHy supplies the workspace selector. Use the installed client’s native sign-in flow; client configuration is managed independently.
 
 ### 2. Clone
 
