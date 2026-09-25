@@ -1,109 +1,97 @@
 # Operations
 
-[Overview](../README.md) · [Setup](setup.md) · [Open work](maintenance.md)
+[Overview](../README.md) · [Setup](setup.md) · [Deviations](../DEVIATIONS.md) · [Open work](maintenance.md)
 
-Run Make targets from the repository root, on the host required by each target.
+Run Make targets from the repository root, on the host each target requires.
 
 ## Workspace Guide
 
-Open the self-contained [EyrAgents Workspace Guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) in a browser and select **Omarchy**. With the standard Projects layout:
+The [EyrAgents workspace guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) is one offline page of Herdr, AI-client, Neovim, Git-review, vault, Bash and Yazi controls. Open it and select **Omarchy** (on GitHub, download the raw file first):
 
 ```bash
 xdg-open "$HOME/Projects/eyrie/eyragents/docs/workspace-guide.html"
 ```
 
-Daily and All views cover Herdr, the AI clients, Neovim/Neo-tree, Git review, vault notes, Bash tools and Yazi. The host profile selects outer-terminal controls and host-specific notes. Search, saved keys, copyable launcher commands and printing work offline; source links open online references when selected.
-
-Adjust the path for a differently located EyrAgents clone, or download the raw HTML from GitHub. EyrAgents owns the guide's source and [maintenance instructions](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide-src/README.md); run `make workspace-guide` and `make check` there to rebuild and check the single output. Host `make twins` protects shared implementation files.
-
-Guide reconciliation is part of every in-scope binding or command addition, change and removal, including inherited defaults after application/plugin updates. `/omasync` reviews host/default and launcher facts and reconciles EyrAgents' `host-reference.json` within authorized companion scope; `/eyrsync` owns AI-client facts. Record unavailable or unauthorized companion work in this repository's maintenance ledger. Build checks verify file consistency; source/help review and actual-host checks establish control accuracy.
+EyrAgents owns the guide and its [maintenance contract](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide-src/README.md). A key or command change here includes reconciling the guide's `host-reference.json` there; `/omasync` reviews host facts and `/eyrsync` client facts.
 
 ## Native Herdr
 
-Launch Herdr independently with `herdr` or Omarchy's native `SUPER CTRL RETURN` binding. In a shell inside that session, navigate to the desired directory, then run `hdw <cc|oc> [-c]` to create and focus a new workspace:
+Start Herdr with `herdr` or Omarchy's `SUPER CTRL RETURN`. In a shell inside it, change to the project directory and run `hdw <cc|oc> [-c]`:
 
-- `cc` sends `claude`; `-c` uses `claude -c`.
-- `oc` sends `opencode`; `-c` uses `opencode -c`.
+| Command | Opens |
+| --- | --- |
+| `hdw cc` | Claude Code (`claude`) |
+| `hdw cc -c` | Claude Code, continuing the last session (`claude -c`) |
+| `hdw oc` | OpenCode (`opencode`) |
+| `hdw oc -c` | OpenCode, continuing the last session (`opencode -c`) |
 
-Omarchy installs the clients ([AI client setup](setup.md#ai-clients)); `hdw` supplies no YOLO flag.
+Each call creates and focuses a new workspace in the current directory: the AI client full-height on the left, Neovim top-right and a shell bottom-right, with the AI client focused. Call it again from any shell, including the new bottom-right one, to open another workspace; existing workspaces keep their names and layouts. Herdr's own controls handle navigation (`Ctrl+Space`, then `c` for a tab or `Shift+C` for a workspace). [DEVIATIONS.md](../DEVIATIONS.md#bash) holds the full contract, including how a failed call preserves state for inspection.
 
-Claude Code continuation follows Claude Code's own session ownership. A session sent to the background with `/bg`, or with `Move to background and exit` in the exit dialog shown while background tasks run, continues under Claude Code's daemon, independent of Herdr windows and the Herdr server. While it runs, `claude -c` refuses with `Your most recent conversation is running in the background (session <uuid>)`; the short id is the first eight characters, and `claude agents` lists them. In the root pane `hdw` opened, `claude attach <id>` reopens the session with its background tasks intact. `claude stop <id>` followed by `claude -c` continues the same session in the foreground and ends its background tasks.
+**Claude Code background sessions.** A session sent to the background with `/bg`, or with *Move to background and exit*, keeps running under Claude Code's own daemon, independently of Herdr. While it runs, `claude -c` refuses with `Your most recent conversation is running in the background (session <uuid>)`. `claude agents` lists such sessions; `claude attach <id>` reopens one with its tasks intact, and `claude stop <id>` followed by `claude -c` continues it in the foreground.
 
-`hdw` uses the current physical directory, not an inferred Git root. AI occupies the full-height left column, Neovim the top-right and a shell the bottom-right, with equal columns, equally stacked right panes and AI focus. The caller may be in a populated tab or an inactive workspace, but its pane identity and selected-tab context must be valid. Every call creates a separate workspace, even in the same directory; change directory in a generated bottom-right shell and call again to open the next workspace. Bare `hdw` prints usage; outside-Herdr or invalid-context calls refuse.
+Omarchy's own launch aliases (`c`, `cx`, `cy`, `ic`, `ix`, `icx`) are unchanged and remain available in `hdw` shells; `cc` and `oc` are `hdw` arguments, not aliases.
 
-Existing workspace/tab names and layouts stay intact, apart from normal global workspace focus moving to the new workspace. New names are Herdr's defaults, with no `--label` or rename/metadata writes; the new default tab displays positional `1` ([Herdr 0.8.2 display-name implementation](https://github.com/herdrdev/herdr/blob/v0.8.2/src/workspace.rs)). There is no workspace reuse, roots registry, server startup or client attachment. Old `hdw` state and recovery files remain unused and untouched. Native controls still own navigation: the shipped `Ctrl+Space` prefix followed by `c` opens a tab and `Shift+C` opens a workspace; in-app help is authoritative for personal keymap changes.
+## Git Review
 
-Cooperating calls are serialized. Caller identity, the pre-creation workspace inventory, the new root's opaque terminal identity, exact membership and complete geometry are checked before tool input. Cleanup may close only proven new split panes before input, never any workspace, tab, root or original caller. A newly created workspace/root always remains for inspection on failure; possible input or uncertain ownership preserves remaining state. Inspect the reported original/new recovery context before manual action. This is not an atomic multi-RPC transaction.
-
-The `cc`/`oc` selectors are arguments, not shell aliases. Stock Omarchy `c`/`cx`/`cy` select OpenCode/Claude Code/Codex respectively, so stock `cx` and `hdw cc` both start Claude Code; `ic`/`ix`/`icx` retain their stock `tdl` recipes. These aliases also remain available in `hdw`-created shells. `hdw` sends full commands without stock shortcut flags, but it is not an isolated profile: both launch paths use normal client configuration. Stock Herdr/tmux functions, bindings and packages remain unchanged.
+Start a fresh Neovim session once after stowing. `Space g d` shows staged and unstaged hunks, `Space g D` compares against origin, and `Space g s` shows status including untracked files. Each uses the Git repository of the current file or directory, or of the selected Neo-tree item, without changing Neovim's working directory; a file outside any repository warns instead of reviewing another one. [DEVIATIONS.md](../DEVIATIONS.md#neovim) holds the full contract.
 
 ## GitHub Access
 
-After [host-local setup](setup.md#github-access), open a fresh normal terminal in this clone and check:
+After [setup](setup.md#github-access), confirm from a fresh terminal in this clone:
 
 ```bash
-command -v gh
 git remote get-url --push --all origin
 gh repo view peregrinus879/eyrarchy --json nameWithOwner,viewerPermission
 GIT_TERMINAL_PROMPT=0 GH_PROMPT_DISABLED=1 \
   git -c credential.interactive=false ls-remote --exit-code --refs origin refs/heads/main
 ```
 
-Expect the canonical HTTPS origin, intended repository/access level, and a branch ID without another credential prompt. Public Git refs can be read anonymously; that result alone does not establish authenticated Git writes. H checks helper configuration locally, without displaying credentials, and the next independently approved publication supplies real write-path evidence.
-
-At the next H-chosen reboot, repeat these checks after normal boot/login, before manually unlocking a keyring or refreshing credentials. Start new Claude Code and OpenCode processes from that fresh shell. Confirm prompt absence explicitly, including normal browser startup; a check repaired in one terminal does not establish startup persistence. Keep missing evidence in [maintenance](maintenance.md#deferred-work).
-
-Authentication establishes account access, not authorization for repository mutations. Credential access carries the account's permissions, not read-only isolation. A locked store, expired login or wrong account requires H-local recovery through the standard CLI/native UI. Neither TLS/host-trust weakening nor dumping tokens is a recovery step. Follow the setup command's host-local configuration target when refreshing Git helper settings after an update.
-
-## Git Review
-
-After stowing, start a fresh Neovim session once to load `git-review.lua`. `Space g d` shows staged and unstaged hunks, `Space g D` compares against origin, and `Space g s` shows status including untracked files. Each invocation uses the current file/directory's Git repository or the selected Neo-tree item, falling back to the displayed tree root when no item path exists. Symlink targets and linked worktrees are supported; switching files between repositories switches the review target without changing any editor directory.
-
-Empty or special non-explorer buffers use the current window's directory. A known non-Git file or explorer target warns instead of silently reviewing another repository. No recurring `:cd`/`:lcd` is needed for repository files or selected repository folders. Keep the ordinary picker review controls; do not use its stage/restore actions unless intended.
+Expect the HTTPS origin, the intended access level, and a branch ID with no credential prompt. Public refs can be read anonymously, so only an approved push proves write access. After a reboot, repeat the check before unlocking a keyring by hand, to confirm access survives a normal login. A locked store, expired login or wrong account is recovered locally through the GitHub CLI; never weaken TLS or dump tokens.
 
 ## Verify
 
-Layout fixtures use fake agents and a Python-backed Herdr model. They cover new-workspace creation, populated/inactive callers, repeated calls and generated-shell chaining, ownership, failure recovery and concurrency without using running user workspaces or real agents. Real-Herdr, rendered UI and actual-host evidence remain separate; see [active limitations](maintenance.md#active-limitations). Preparation fixtures cover real old Stow deployments followed by pending/post-pull retirement, exact ownership, refusal and read-only verification. Repository checks do not require or invoke tmux.
+After any change:
 
-After stowing or changing owned packages:
+```bash
+make lint check   # ShellCheck 0.11.0 or newer; Bash, Lua and TOML syntax; the fixture tests
+```
 
-- Run `make lint` and `make check` after any change; both are repository-only (ShellCheck; bash, Lua, and TOML syntax; the `tests/` fixtures). GitHub Actions runs them on pushes to `main` and pull requests, plus an exact committed twin-pair check against EyrWSL's fetched default branch.
-- Run `make verify` from the repo root on the Omarchy host after stowing or changing owned packages: `lint`, `check`, and `twins`, then retired-endpoint absence, live source existence, the stowed symlinks (compared by resolved path), every managed parent being a real directory, the Git identity (it must resolve to a GitHub no-reply address; the value is not printed), every `hl.unbind` target and personal chord in `bindings.lua` against the installed Omarchy defaults, and Hyprland config errors.
-- Confirm `SUPER G` toggles window grouping and `SUPER ALT G` moves the active window out of its group. `SUPER ALT B` opens Basecamp, `SUPER ALT C` opens ChatGPT web, and `SUPER SHIFT C` launches or focuses the ChatGPT desktop app. Gmail has no replacement shortcut; [Hyprland deviations](../DEVIATIONS.md#hyprland) own the launch targets and default-key exceptions.
-- Start a fresh shell and confirm `type y` shows the Yazi cd-on-exit function.
-- Start a fresh shell and confirm `alias c cx cy ic ix icx` matches Omarchy's installed defaults; `alias claude` should still report no alias. Stock shortcuts keep their own launch flags and normal client configuration.
-- Confirm `type hdw` shows the new-workspace helper and a fresh shell no longer loads custom `tdw`. In a disposable Herdr session/project, check the [Native Herdr](#native-herdr) layout, full agent/continuation commands, native names and AI focus. Repeated calls, including from a populated caller, a valid inactive source workspace and a generated bottom-right shell, must each create a new workspace; existing names/layouts must stay intact apart from global focus. Bare invocation shows usage; outside-Herdr and invalid-context calls refuse. Do not experiment in an existing working session.
-- On helper failure, inspect the original/new pane/tab/workspace context before manual cleanup. The new workspace/root must remain; only verified new split panes may be removed before possible input, never any workspace/tab/root/caller. Never delete unfamiliar panes or retained state/recovery files. Omarchy's stock Herdr/tmux functions, configuration and launch bindings remain upstream-owned and unchanged.
-- `hl.env` values in the tracked hypr files reach the compositor on reload but reach uwsm-launched clients only at session start; after first adopting the hypr package on a running session, log out and back in once.
-- Run `yazi` and confirm the layout ratio and sort order match the config.
-- Open a vault note in Neovim and confirm obsidian.nvim loads (`<leader>oo` opens the note switcher).
-- Check Git review from files in two repositories and from a selected Neo-tree repository folder while the editor was launched in their non-Git parent; `Space g d` and `Space g s` must target the selection without changing `:pwd`.
+On Omarchy, after stowing or changing a package, `make verify` runs `lint`, `check` and `twins`, then checks the deployment: retired links are gone, every managed parent is a real directory, each link resolves into this clone, the Git identity is a GitHub no-reply address (without printing it), every `hl.unbind` target exists in Omarchy's defaults and no personal chord collides with a default that is still bound, and Hyprland reports no configuration errors.
 
-CI runs `make lint`, `make check`, and `twins-pair` on pushes to `main` and pull requests, using the peer default branch for normal runs. Manual workflow dispatch accepts an explicit full `peer_commit` only with `peer_reviewed=true`; it fetches peer objects without executing peer code and records both actual commits. This attestation is not publication authorization. For coordinated changes, verify the final published pair explicitly after both commits are available; a green check against an earlier peer is not final-pair evidence. Local `make twins` remains a worktree convenience check that can skip a missing sibling.
+Then check by hand, in fresh sessions:
 
-CI uses the official `archlinux:base` container with a full signed-package upgrade, matching the Arch userspace of both supported hosts. `ubuntu-latest` supplies only GitHub's VM. Checks run as an unprivileged `ci` user with explicit Bash, a private temporary directory and container process reaping; checkout credentials are not persisted. CI does not perform or attest deployment to Omarchy or WSL.
+- `type y` shows the Yazi cd-on-exit function and `type hdw` the workspace helper;
+- `alias c cx cy ic ix icx` matches Omarchy's defaults, and `alias claude` reports no alias;
+- in a disposable Herdr session, `hdw` produces the layout above, repeated calls each create a new workspace, bare `hdw` prints usage, and calls outside Herdr refuse;
+- `SUPER G` toggles window grouping, `SUPER ALT G` moves a window out of its group, `SUPER ALT B` opens Basecamp, `SUPER ALT C` opens ChatGPT on the web and `SUPER SHIFT C` the ChatGPT app;
+- `yazi` shows the configured layout and sort order;
+- a vault note loads obsidian.nvim (`<leader>oo` opens the note switcher);
+- Git review targets the selected repository when Neovim was started in a non-Git parent directory, without changing `:pwd`.
 
-## Maintenance
+After first adopting the `hypr` package on a running session, log out and back in once: `hl.env` values reach applications started by uwsm only at session start.
 
-A repo-root `Makefile` keeps the package list in one place and wraps the routine commands. Run targets from the repo root on the Omarchy machine:
+The fixture tests model Herdr, Stow and the Omarchy defaults in fake homes; they do not replace a check on the real host. GitHub Actions runs `make lint check` and an exact twin-pair check against EyrWSL's default branch on every push to `main` and every pull request, in an `archlinux:base` container as an unprivileged user; it does not deploy to a host.
 
-- `make stow` / `make unstow` / `make dry-run` / `make restow` - the stow command sets over the package list
-- `make lint` - ShellCheck 0.11.0 or newer over the bash package, `scripts/`, and `tests/`; `.shellcheckrc` disables the upstream-derived warnings so new issues stand out
-- `make check` - repository-only checks: bash, Lua, and TOML syntax, then the `tests/` fixtures (`prepare-stow.sh` in a fake home, `check-bindings.sh` against fake defaults)
-- `make twins` - twin-file sync against the EyrWSL clone (`SIBLING`, default `~/Projects/eyrie/eyrwsl`); a missing sibling is reported as a skipped check
-- `make twins-pair SELF_COMMIT=<full-sha> PEER_COMMIT=<full-sha> SIBLING=<peer-object-repo>` - read-only twin comparison of two exact full 40-character commit IDs; all three inputs remain literal data, missing objects/files fail, and no peer code executes. Replace the placeholders and quote the peer path; do not type angle brackets
-- `make test` - the `tests/` fixtures alone, in fake homes
-- `make verify` - `lint`, `check`, and `twins`, then the host checks listed under Verify; refuses off the Omarchy host
-- `make clean` - guarded Stow preparation (`scripts/prepare-stow.sh`); owned folded links, recognized dangling clone links and exact retired links only, with real directories/user state preserved and complete preflight refusal on unsafe parents, foreign entries, regular files and special files
-- `make recover` - the Recovery steps after `omarchy-reinstall-configs` (clean + restow)
-- `make refs` - clone and fast-forward listed references to exact fetched upstream parity, repointing moved GitHub remotes; report and keep stale clones, never auto-delete them (`/omasync` step 1)
+## Make Targets
 
-Every host-writing Make target checks host and deployed-clone ownership before mutation. Deployment goals are serialized within one Make invocation, including `make -j`; this is not rollback against I/O failure or independent concurrent deployments.
+| Target | Does |
+| --- | --- |
+| `make dry-run` | Preview Stow's links |
+| `make stow`, `make restow`, `make unstow` | Deploy, redeploy or remove the packages (Omarchy only) |
+| `make clean` | Guarded preparation: remove only folded, dangling or retired links this clone owns; refuse on anything else (Omarchy only) |
+| `make recover` | `clean` then `restow`, after an Omarchy configuration reset (Omarchy only; [setup](setup.md#recovery-after-omarchy-config-resets)) |
+| `make lint`, `make check`, `make test` | Repository checks and the fixture tests |
+| `make verify` | Repository and deployment checks (Omarchy only) |
+| `make twins` | Compare the twin files with the EyrWSL clone (`SIBLING`, default `~/Projects/eyrie/eyrwsl`); a missing sibling is skipped |
+| `make twins-pair SELF_COMMIT=<sha> PEER_COMMIT=<sha> SIBLING=<path>` | Compare the twin files at two exact full commit IDs, without running the peer's code |
+| `make refs-plan`, `make refs` | Preview, then refresh the reference clones in [`references.txt`](../references.txt) |
 
-Before running `make refs`, preview with `make refs-plan` and approve any new clone or remote repointing separately. The preview can query GitHub but does not fetch or establish conflict-free upstream parity. Routine authorized refreshes remain the sync skill's work; atomic fetch does not make the whole host-pair update transactional.
+`make stow`, `restow` and `recover` finish with a forced Hyprland reload and a configuration-error check when run inside Hyprland. Deployment goals in one Make invocation run serially, even under `make -j`; this is not a transaction against disk failure or a second concurrent deployment.
 
-`make refs` refuses ahead-only/divergent listed default branches instead of calling them current. Its atomic, non-forced fetch preserves existing local tags and annotations, imports new tags, and prunes only origin tracking branches. Checkout and merge use `--no-overwrite-ignore`, preserving ignored files in listed clones. Tag/file conflicts refuse that update and require separate review; do not force a tag replacement or delete local files to make it pass. Stale references are informational and require separate review of all refs, stashes, and ignored/untracked files before any manual removal.
+**Twin pairs in CI.** A manual workflow run accepts an explicit `peer_commit` only with `peer_reviewed=true`, fetches the peer's objects without executing its code, and records both commits. For a coordinated change, check the final published pair once both commits are available; a green check against an earlier peer is not evidence for the final pair.
 
-`make stow`, `make restow`, and `make recover` finish with a forced Hyprland reload and config-error check when run inside a Hyprland session (rationale in the Makefile header); `make verify` runs the same check read-only.
+**Reference clones.** Approve a new clone or a remote repointing that `make refs-plan` shows before running `make refs`. The refresh fast-forwards listed default branches to the fetched upstream and refuses branches that are ahead or diverged; its fetch keeps existing local tags, imports new ones and prunes only origin tracking branches, and checkout never overwrites ignored files. It may include the EyrWSL peer when selected, never arbitrary neighboring repositories. Conflicts refuse for separate review, and stale clones are reported and kept.
 
-Periodically, review the local reference repos and official docs for upstream changes to overridden items, sync with `/omasync` or a manual comparison, and confirm every intentional difference is still documented in `DEVIATIONS.md`. Unresolved decisions, deferred work, active limitations, and dated evidence live in [docs/maintenance.md](maintenance.md).
+## Upstream Changes
+
+At each Omarchy package update, run `/omasync` to compare the overridden files with the new defaults and official documentation, confirm every difference is still documented in DEVIATIONS.md, and run `make verify`.

@@ -153,7 +153,7 @@ cd ~/Projects/eyrie/eyrarchy
 make restow
 ```
 
-After pulling the custom `tdw` removal, run guarded cleanup before restowing:
+When a pull retires a stowed file, run guarded cleanup before restowing. `make restow` re-links the current packages and lets Stow prune dangling links into this clone, but only inside directories the packages still populate; it does not run the guarded cleanup, which alone handles folds and directories no package populates and checks exact ownership:
 
 ```bash
 make clean
@@ -161,7 +161,7 @@ make restow
 make verify
 ```
 
-The retirement inventory explicitly maps `~/.config/bash/functions/tdw` to this clone's old `bash/.config/bash/functions/tdw`, even when that source no longer appears in Git. Only an exact relative or absolute owned link is removed; foreign or lookalike links (including dangling links into another clone), regular files and special entries refuse unchanged. Safe real parents stay; exact old owned folds can be removed without traversing them. `make verify` includes preparation's read-only `--check-retired` route and requires the retired endpoint to be absent, whether the source deletion is pending or already pulled. Unrelated missing sources still fail. `make restow` keeps its ordinary Stow semantics and does not run cleanup implicitly. No Omarchy refresh, tmux package/configuration change or session termination is part of this retirement. Start a fresh shell to drop an already-loaded `tdw` function.
+Cleanup removes a retired link only when it points exactly at this clone's former file (the retired `~/.config/bash/functions/tdw`, for example); a link into another clone, a regular file or anything unexpected refuses unchanged. `make verify` fails while a retired link remains. Start a fresh shell to drop a function a running shell already loaded.
 
 To migrate from a different clone path, unstow from the old location first:
 
@@ -171,7 +171,7 @@ cd ~/Projects/eyrie/eyrarchy
 make stow
 ```
 
-If the old clone is no longer available, `make clean` (section 3) removes recognized dangling links for active packages; then run `make stow`. Retired `tdw` ownership is stricter: a link into another clone requires exact-path review instead of automatic cleanup.
+If the old clone is no longer available, `make clean` (section 3) removes recognized dangling links for active packages; then run `make stow`. A retired link into another clone needs review of that exact path instead.
 
 ### Recovery After Omarchy Config Resets
 

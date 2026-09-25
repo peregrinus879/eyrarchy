@@ -15,7 +15,7 @@ Local reference clones live under `~/Projects/quarry/`; `references.txt` names t
 - `omarchy-pkgs/` - Omarchy's package build recipes, for package version and dependency questions
 - `obsidian.nvim/` - obsidian.nvim upstream for the vault plugin spec
 
-The installed defaults the machine actually runs live under `/usr/share/omarchy` (package-backed). The shipped `omarchy` agent skill (auto-discovered via `~/.claude/skills/omarchy`; package copy at `/usr/share/omarchy/default/agents/skills/omarchy`) is upstream-owned, refreshed with Omarchy updates, and authoritative for desktop-config editing; never fork it into this repo. Upstream URLs, official docs, and descriptions live in `DEVIATIONS.md` (Reference Sources). Unresolved decisions, deferred work, and dated evidence live in `docs/maintenance.md`; host-pair coordination follows the EyrWSL ledger and `AGENTS.md`.
+The installed defaults the machine actually runs live under `/usr/share/omarchy` (package-backed). The shipped `omarchy` agent skill (auto-discovered via `~/.claude/skills/omarchy`; package copy at `/usr/share/omarchy/default/agents/skills/omarchy`) is upstream-owned, refreshed with Omarchy updates, and authoritative for desktop-config editing; never fork it into this repo. Upstream URLs, official docs, and descriptions live in `DEVIATIONS.md` (Reference Sources). Open work, with each limitation's trigger for the next check, lives in `docs/maintenance.md`; host-pair coordination follows the EyrWSL ledger and `AGENTS.md`.
 
 ## When To Use
 

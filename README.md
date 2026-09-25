@@ -1,71 +1,45 @@
 # EyrArcHy
 
-Personal shell, desktop, and editor customizations for an existing [Omarchy](https://github.com/omacom/omarchy) installation, deployed with [GNU Stow](https://www.gnu.org/software/stow/).
+Personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop, deployed with [GNU Stow](https://www.gnu.org/software/stow/). Omarchy keeps its defaults; EyrArcHy loads after them and changes only what needs to differ, with every difference and its reason in [DEVIATIONS.md](DEVIATIONS.md).
 
-EyrArcHy layers targeted overrides onto Omarchy. It follows the installed defaults and keeps intentional differences in [DEVIATIONS.md](DEVIATIONS.md).
+## What You Get
 
-## What Is Included
-
-- Bash additions and `hdw`, a three-pane native Herdr workspace helper.
-- Personal Hyprland keybindings, display, input, and appearance overrides.
-- Additive Neovim plugins for vault work and contextual Git review.
-- Yazi configuration.
-
-Omarchy owns the base desktop, themes, native launch recipes, and tmux.
-
-## Package Layout
-
-These directories are Stow packages. `scripts/`, `tests/`, and `docs/` support the repository itself.
-
-| Package | Contents |
+| Package | Adds |
 | --- | --- |
-| `bash/` | Bash configuration that sources Omarchy defaults, plus personal additions and `hdw`. |
-| `hypr/` | Personal Hyprland overrides loaded after the defaults. |
-| `nvim/` | Plugin specs added to the Omarchy-managed Neovim base. |
-| `yazi/` | File-manager configuration using the terminal's theme. |
+| `bash/` | Personal Bash additions on top of Omarchy's, a Yazi cd-on-exit function, and `hdw`, which opens an AI client, Neovim and a shell as a new [Herdr](https://herdr.dev) workspace |
+| `hypr/` | Hyprland keybindings, display, keyboard layout and appearance overrides |
+| `nvim/` | Neovim plugin specs for an Obsidian-style vault and repository-aware Git review, on top of Omarchy's Neovim setup |
+| `yazi/` | [Yazi](https://yazi-rs.github.io) file-manager configuration, using the terminal's theme |
 
-## Repository Family
+## Requirements
 
-The two host-dotfiles repositories share selected configuration and verification contracts.
+A working Omarchy installation, plus Yazi (`sudo pacman -S yazi`). The vault workflow expects notes at `~/Projects/vault` (or `OBSIDIAN_VAULT`).
 
-| Repository | Purpose |
-| --- | --- |
-| [EyrArcHy](https://github.com/peregrinus879/eyrarchy) | Personal shell, desktop, and editor customizations for an existing Omarchy installation. |
-| [EyrWSL](https://github.com/peregrinus879/eyrwsl) | A self-contained Arch WSL terminal environment with Windows integration and mise-managed AI tools. |
+## Quick Start
 
-[EyrAgents](https://github.com/peregrinus879/eyragents) independently owns the shared AI harness and full workspace guide. The host repositories remain the configuration twins.
+```bash
+git clone https://github.com/peregrinus879/eyrarchy.git ~/Projects/eyrie/eyrarchy
+cd ~/Projects/eyrie/eyrarchy
+make dry-run   # preview; resolve any conflict first
+make stow      # deploy
+make verify    # repository and deployment checks
+```
 
-## Setup
-
-Use the [setup and recovery guide](docs/setup.md) on a working Omarchy desktop. It covers prerequisites, clone ownership, conflict review, preview, deployment, and recovery after an upstream configuration refresh.
-
-**Keep the deployed clone:** its files supply live configuration. Inspect conflicts and preserve local customizations before stowing.
-
-## Usage
-
-Inside an existing Herdr session, change to your project and run `hdw cc` to open Claude Code, Neovim, and a shell in a new workspace. `hdw cc -c` continues Claude Code; `oc` selects OpenCode.
-
-See [Native Herdr](docs/operations.md#native-herdr) for layout, selectors, continuation, and recovery behavior, and [Git review](docs/operations.md#git-review) for the contextual Neovim mappings.
-
-Open the [EyrAgents Workspace Guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) for searchable host and AI-client keys, commands, launch recipes and workflows. The single offline file includes both host profiles; on GitHub, download the raw HTML first. [Operations](docs/operations.md#workspace-guide) gives the local opening command.
-
-[GitHub setup](docs/setup.md#github-access) uses Omarchy's GitHub CLI and HTTPS. [Operations](docs/operations.md#github-access) covers fresh-client and reboot checks.
-
-## Verify
-
-`make lint check` runs repository checks. On the Omarchy host, `make verify` also checks deployed configuration and `make twins` compares shared files with EyrWSL. The [operations guide](docs/operations.md#verify) covers fresh-session checks, CI, and exact committed twin pairs.
+The deployed clone is live configuration, so keep it in place; [setup](docs/setup.md) covers conflicts, Git identity, GitHub access, moves and recovery after Omarchy resets its configuration. Inside Herdr, `hdw cc` opens Claude Code, Neovim and a shell as a new workspace; [operations](docs/operations.md) covers daily use.
 
 ## Documentation
 
 | Need | Read |
 | --- | --- |
-| Install, move, or recover the deployment | [Setup](docs/setup.md) |
-| Use helpers, verify changes, or perform routine maintenance | [Operations](docs/operations.md) |
-| Find workspace keys, commands and everyday workflows | [EyrAgents workspace guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) |
-| Understand ownership and intentional differences | [Deviations](DEVIATIONS.md) |
-| Find unresolved issues and pending work | [Maintenance ledger](docs/maintenance.md) |
+| Install, move or recover | [Setup](docs/setup.md) |
+| Daily use, checks and Make targets | [Operations](docs/operations.md) |
+| What differs from Omarchy, and why | [DEVIATIONS.md](DEVIATIONS.md) |
+| Keys, commands and workflows, offline | [EyrAgents workspace guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) (download the raw file) |
+| Open work | [Maintenance ledger](docs/maintenance.md) |
 | Reconcile with upstream Omarchy | [omasync](.agents/skills/omasync/SKILL.md) |
-| Change the repository with an agent | [AGENTS.md](AGENTS.md) |
+| Rules for agents changing this repository | [AGENTS.md](AGENTS.md) |
+
+Companion repositories: [EyrWSL](https://github.com/peregrinus879/eyrwsl) brings the same Omarchy-derived terminal environment to Arch Linux on WSL 2, sharing several files byte for byte, and [EyrAgents](https://github.com/peregrinus879/eyragents) holds the shared AI harness.
 
 ## License
 
