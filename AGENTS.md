@@ -1,6 +1,6 @@
 # AGENTS.md - EyrArcHy
 
-EyrArcHy is a set of personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop, deployed with [GNU Stow](https://www.gnu.org/software/stow/): Bash additions and the `hdw` workspace helper in `bash/`, Hyprland overrides in `hypr/`, additive Neovim plugin specs in `nvim/`, and Yazi configuration in `yazi/`. Omarchy, its official documentation and [DEVIATIONS.md](DEVIATIONS.md) are the source of truth for default behavior and every intentional difference.
+EyrArcHy is a set of personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop, deployed with [GNU Stow](https://www.gnu.org/software/stow/): Bash additions and the `hdw` workspace helper in `bash/`, Hyprland overrides in `hypr/`, additive Neovim plugin specs in `nvim/`, Yazi configuration in `yazi/`, and root-owned host files in `system/`. Omarchy, its official documentation and [DEVIATIONS.md](DEVIATIONS.md) are the source of truth for default behavior and every intentional difference.
 
 ## Loading
 
@@ -27,6 +27,7 @@ State each fact once, at its owner, and link to it. Git history holds provenance
 - **Live configuration.** An edit to a stowed file takes effect at the next shell, Hyprland reload (Hyprland reloads on save), Neovim session or Yazi launch, before any commit. Work on this repository only in a session H is watching.
 - **Layer on Omarchy.** Load Omarchy's defaults first and override only what needs to differ; never copy its defaults, themes, AI launch aliases, Herdr recipes or tmux setup. Every intentional difference is documented in DEVIATIONS.md, and the overview, this file and the affected guides change together with it.
 - **Twins with EyrWSL.** The files in the Makefile's `TWIN_SPECS` (Neovim plugin specs, `hdw`, Yazi configuration, the reference updater and their tests) are byte-identical across EyrArcHy and [EyrWSL](https://github.com/peregrinus879/eyrwsl); shared concepts use identical wording in both repositories, with only repository-specific values differing.
+- **Host system files.** `system/` mirrors paths under `/` and is never stowed or linked: H installs root-owned copies with the commands in [setup](docs/setup.md#5-host-system-files), so a change to one includes those commands for H. `make verify` fails while a copy differs.
 - **Host-local state.** Git identity and GitHub helper settings live in the untracked `~/.config/git/config.local`, never in a package; credentials never enter the repository.
 - **Preservation.** Cleanup, reference refreshes and recovery never delete or overwrite what they cannot prove they own; they refuse and report instead. The script headers and [setup](docs/setup.md) state each rule.
 

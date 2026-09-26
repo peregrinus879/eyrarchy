@@ -1,0 +1,50 @@
+#!/bin/bash
+# DKMS PRE_BUILD step for the nvidia module, enabled by /etc/dkms/nvidia.conf.
+# Applies NVIDIA open-gpu-kernel-modules PR #1286 (bounded GPFIFO wait, DIFR
+# prefetch channel reset) to DKMS's fresh copy of the source, only when the
+# whole patch applies with exact context; every other case builds stock. DKMS
+# halts the build on a non-zero exit, and with the display MUX on NVIDIA a
+# halted build leaves no graphics driver, so every skip exits 0. The one
+# exception is a patch that fails after a clean dry run, which could leave a
+# partly patched tree. Each outcome goes to DKMS's make.log and the journal
+# (journalctl -t nvidia-difr-patch).
+# Usage: nvidia-difr-patch <build-dir> [kernel]
+set -u
+
+patch_file=${NVIDIA_DIFR_PATCH:-/etc/dkms/nvidia/pr1286.patch}
+tree=${1:-}
+kernel=${2:-unknown}
+
+report() {
+  printf 'nvidia-difr-patch: %s\n' "$1"
+  logger -t nvidia-difr-patch -- "$1" 2>/dev/null || true
+}
+
+# --force never asks and never guesses that a patch is reversed; --fuzz=0
+# demands exact context.
+run_patch() {
+  patch -p1 --force --fuzz=0 --no-backup-if-mismatch -d "$tree" -i "$patch_file" "$@"
+}
+
+if [[ ! -f $tree/src/nvidia-modeset/src/nvkms-difr.c || ! -f $tree/src/common/unix/nvidia-push/src/nvidia-push.c ]]; then
+  report "no NVIDIA open-module source at '$tree' (kernel $kernel); building stock"
+  exit 0
+fi
+if [[ ! -r $patch_file ]] || ! command -v patch >/dev/null; then
+  report "$patch_file or patch(1) is missing (kernel $kernel); building stock"
+  exit 0
+fi
+if run_patch --reverse --dry-run >/dev/null; then
+  report "$tree already contains PR #1286 (kernel $kernel); NVIDIA shipped the fix, remove the override"
+  exit 0
+fi
+if ! run_patch --dry-run; then
+  report "PR #1286 does not apply to $tree (kernel $kernel); building stock"
+  exit 0
+fi
+if run_patch; then
+  report "applied PR #1286 to $tree (kernel $kernel)"
+  exit 0
+fi
+report "PR #1286 failed after a clean dry run on $tree (kernel $kernel); halting the build"
+exit 1

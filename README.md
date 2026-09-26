@@ -10,6 +10,7 @@ Personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy)
 | `hypr/` | Hyprland keybindings, display, keyboard layout and appearance overrides |
 | `nvim/` | Neovim plugin specs for an Obsidian-style vault and repository-aware Git review, on top of Omarchy's Neovim setup |
 | `yazi/` | [Yazi](https://yazi-rs.github.io) file-manager configuration, using the terminal's theme |
+| `system/` | Root-owned files for this laptop, installed as copies rather than stowed: SysRq recovery keys and a DKMS override that patches the NVIDIA driver's display-freeze bug |
 
 ## Requirements
 
@@ -25,7 +26,7 @@ make stow      # deploy
 make verify    # repository and deployment checks
 ```
 
-The deployed clone is live configuration, so keep it in place; [setup](docs/setup.md) covers conflicts, Git identity, GitHub access, moves and recovery after Omarchy resets its configuration. Inside Herdr, `hdw cc` opens Claude Code, Neovim and a shell as a new workspace; [operations](docs/operations.md) covers daily use.
+`make verify` also expects the `system/` files, which [setup](docs/setup.md#5-host-system-files) installs. The deployed clone is live configuration, so keep it in place; [setup](docs/setup.md) covers conflicts, Git identity, GitHub access, moves and recovery after Omarchy resets its configuration. Inside Herdr, `hdw cc` opens Claude Code, Neovim and a shell as a new workspace; [operations](docs/operations.md) covers daily use.
 
 ## Documentation
 

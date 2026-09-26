@@ -288,6 +288,7 @@ case_retired_owned() {
   fi
   printf 'user state\n' >"$home/.config/bash/functions/personal"
   printf '#!/bin/bash\nexit 0\n' >"$repo/scripts/check-bindings.sh"
+  printf '#!/bin/bash\nexit 0\n' >"$repo/scripts/check-system.sh"
   if out=$(check_retired "$home" "$repo" 2>&1); then fail 'read-only check accepted a remaining retired link'; fi
   [[ $out == *'retired link remains'* && -L $endpoint ]] || fail "retirement check mutated or failed incorrectly: $out"
   if out=$(verify "$home" "$repo" 2>&1); then fail 'Make verify accepted a remaining retired link'; fi

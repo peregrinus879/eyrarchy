@@ -63,6 +63,31 @@ make stow
 
 Stow runs without directory folding, so `~/.config/bash`, `~/.config/yazi`, and the other managed parents stay real directories that tools may write into; Stow reports any conflicting regular file without changing it. Inside a Hyprland session, `make stow` finishes with a forced reload and a config-error check. Start a fresh shell to load the current helper and stock AI aliases without retaining retired function definitions; preserve existing sessions.
 
+### 5. Host System Files
+
+`system/` mirrors paths under `/` for this laptop; [DEVIATIONS.md](../DEVIATIONS.md#host-gu605) gives each file's reason and why Stow never links them. Create a snapshot, install root-owned copies, apply the SysRq setting, then reinstall the installed driver version from the package cache, so DKMS rebuilds it through the override for every kernel with headers and the initramfs is regenerated:
+
+```bash
+omarchy-snapshot create
+cd ~/Projects/eyrie/eyrarchy
+sudo install -D -o root -g root -m 644 system/etc/sysctl.d/99-sysrq.conf /etc/sysctl.d/99-sysrq.conf
+sudo install -D -o root -g root -m 644 system/etc/dkms/nvidia.conf /etc/dkms/nvidia.conf
+sudo install -D -o root -g root -m 755 system/etc/dkms/nvidia/nvidia-difr-patch /etc/dkms/nvidia/nvidia-difr-patch
+sudo install -D -o root -g root -m 644 system/etc/dkms/nvidia/pr1286.patch /etc/dkms/nvidia/pr1286.patch
+sudo sysctl -p /etc/sysctl.d/99-sysrq.conf
+sudo pacman -U "/var/cache/pacman/pkg/nvidia-open-dkms-$(pacman -Q nvidia-open-dkms | cut -d' ' -f2)-x86_64.pkg.tar.zst"
+```
+
+The sysctl `install` replaces any existing file at that path. `pacman -U` of the cached file reinstalls the exact installed version; `pacman -S` could upgrade the driver without its matching `nvidia-utils`. The remove phase may warn about DKMS entries for kernels no longer installed, which is harmless. Expect `dkms install` for each kernel without a warning, and one "applied PR #1286" line per kernel in `journalctl -t nvidia-difr-patch -b`. Reboot, then run `make verify`. An edited `system/` file takes effect only after its `install` line runs again, followed by the reinstall for the DKMS files. If the rebuilt driver leaves no display, boot the snapshot from the Limine menu's Snapshots entry and run `omarchy-snapshot restore`.
+
+To retire the override, remove the DKMS files and reinstall the driver the same way, so it rebuilds stock:
+
+```bash
+sudo rm /etc/dkms/nvidia.conf /etc/dkms/nvidia/nvidia-difr-patch /etc/dkms/nvidia/pr1286.patch
+sudo rmdir /etc/dkms/nvidia
+sudo pacman -U "/var/cache/pacman/pkg/nvidia-open-dkms-$(pacman -Q nvidia-open-dkms | cut -d' ' -f2)-x86_64.pkg.tar.zst"
+```
+
 ### Git Identity And Host-Local Settings
 
 EyrArcHy does not deploy a Git package. Stock Omarchy's global Git config contains identity settings but does not create the family’s `config.local` include. Establish that include before configuring the GitHub helper.

@@ -17,6 +17,7 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 3. **Keep scope to personal desktop customizations.** Shared Linux baseline behavior and headless adaptations are out of scope.
 4. **No theme customizations.** Omarchy manages themes. This repo does not track theme files.
 5. **Additive Neovim plugin specs only.** `omarchy-nvim` owns the base Neovim config; this repo adds vault-workflow plugin specs on top without touching base options.
+6. **Host system files only where the desktop needs them.** `system/` carries the few root-owned files this laptop's desktop depends on, installed as copies, never stowed ([Host](#host-gu605)).
 
 ## Reference Sources
 
@@ -26,6 +27,9 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 - [MeanderingProgrammer/render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim) - upstream for the markdown rendering spec
 - [sxyazi/yazi](https://github.com/sxyazi/yazi) and the [Yazi docs](https://yazi-rs.github.io/docs/) - file manager upstream and configuration reference
 - [GNU Stow manual](https://www.gnu.org/software/stow/manual/stow.html) - symlink management and package structure
+- [dkms-project/dkms](https://github.com/dkms-project/dkms) and dkms(8) - DKMS, including its `/etc/dkms` overrides
+- [NVIDIA/open-gpu-kernel-modules](https://github.com/NVIDIA/open-gpu-kernel-modules) - the open kernel modules behind `nvidia-open-dkms`, the DIFR issue and its pending fix
+- [Linux Magic System Request Key Hacks](https://docs.kernel.org/admin-guide/sysrq.html) - SysRq keys and the `kernel.sysrq` bitmask
 
 ## Intentional Deviations
 
@@ -73,6 +77,14 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 - Added entirely. Yazi is not part of Omarchy.
 - `yazi.toml` carries local layout and behavior choices: ratio `[2, 4, 4]`, hidden files shown, directories sorted first, `sort_by = "natural"`, and `linemode = "size"`. Tracked as a byte-identical twin with EyrWSL.
 - No theme file is tracked; the Omarchy theme pipeline does not cover Yazi, which runs its built-in default theme over the terminal's themed palette.
+
+### Host (GU605)
+
+`system/` mirrors paths under `/` for this laptop, an ASUS ROG Zephyrus G16 GU605CR whose RTX 5070 Ti Laptop GPU drives the internal panel directly (display MUX in dGPU mode, kept for gaming). Stow never links these files: H installs them as root-owned copies ([setup](docs/setup.md#5-host-system-files)), because DKMS runs the script as root and a link into the user-writable clone would let the clone change what root runs. `make verify` checks the installed copies.
+
+- `etc/sysctl.d/99-sysrq.conf` sets `kernel.sysrq = 184`, enabling the task-dump, sync, read-only remount and reboot keys where systemd's default allows only sync; Omarchy sets none. A frozen desktop can then log its blocked tasks and reboot with filesystems synced and read-only, instead of a forced power-off. [Operations](docs/operations.md#desktop-freeze) holds the keys.
+- `etc/dkms/nvidia.conf` is a DKMS override (dkms(8), DKMS.CONF OVERRIDES) whose `PRE_BUILD` runs `etc/dkms/nvidia/nvidia-difr-patch` on DKMS's fresh copy of the `nvidia-open-dkms` source at every build, for driver and kernel updates alike. The script applies `etc/dkms/nvidia/pr1286.patch`, the two commits of NVIDIA's open [PR #1286](https://github.com/NVIDIA/open-gpu-kernel-modules/pull/1286), only when the whole patch applies with exact context; otherwise the build stays stock. Each outcome is logged under the journal tag `nvidia-difr-patch`, `/usr/src` stays as packaged, and `make verify` fails while the loaded `nvidia-modeset` lacks the patch.
+- Reason for the override: the driver's DIFR (Display Idle Frame Refresh) prefetch worker can wait without a timeout in `nvWriteGpEntry` while holding the NVKMS power-management lock, so Hyprland's next modeset blocks and the desktop stays frozen until a forced power-off ([#1289](https://github.com/NVIDIA/open-gpu-kernel-modules/issues/1289)). The driver has no switch to disable DIFR. The patch bounds the wait at 3 s and resets the prefetch channel after a copy-engine fault. [Maintenance](docs/maintenance.md) tracks its removal.
 
 ## Out Of Scope
 

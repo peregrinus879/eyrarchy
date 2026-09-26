@@ -48,6 +48,19 @@ GIT_TERMINAL_PROMPT=0 GH_PROMPT_DISABLED=1 \
 
 Expect the HTTPS origin, the intended access level, and a branch ID with no credential prompt. Public refs can be read anonymously, so only an approved push proves write access. After a reboot, repeat the check before unlocking a keyring by hand, to confirm access survives a normal login. A locked store, expired login or wrong account is recovered locally through the GitHub CLI; never weaken TLS or dump tokens.
 
+## Desktop Freeze
+
+If the desktop stops responding, use the kernel's SysRq keys ([DEVIATIONS.md](../DEVIATIONS.md#host-gu605)) from the external Alice keyboard; the laptop keyboard has no PrtSc/SysRq key. Hold Alt+PrtSc and press, about a second apart:
+
+| Key | Does |
+| --- | --- |
+| `W` | Logs blocked tasks to the kernel log, the evidence for a report |
+| `S` | Syncs filesystems |
+| `U` | Remounts filesystems read-only |
+| `B` | Reboots immediately |
+
+Alt+PrtSc on its own is Omarchy's screen-recording binding. After the reboot, `journalctl -k -b -1 | grep -A60 'sysrq: Show Blocked State'` shows the dump. A freeze while `make verify` passes means the NVIDIA patch did not prevent it; keep the dump for the upstream report ([maintenance](maintenance.md)).
+
 ## Verify
 
 After any change:
@@ -56,7 +69,7 @@ After any change:
 make lint check   # ShellCheck 0.11.0 or newer; Bash, Lua and TOML syntax; the fixture tests
 ```
 
-On Omarchy, after stowing or changing a package, `make verify` runs `lint`, `check` and `twins`, then checks the deployment: retired links are gone, every managed parent is a real directory, each link resolves into this clone, the Git identity is a GitHub no-reply address (without printing it), every `hl.unbind` target exists in Omarchy's defaults and no personal chord collides with a default that is still bound, and Hyprland reports no configuration errors.
+On Omarchy, after stowing or changing a package, `make verify` runs `lint`, `check` and `twins`, then checks the deployment: retired links are gone, every managed parent is a real directory, each link resolves into this clone, the Git identity is a GitHub no-reply address (without printing it), every `hl.unbind` target exists in Omarchy's defaults and no personal chord collides with a default that is still bound, Hyprland reports no configuration errors, each `system/` file is installed as an identical root-owned regular copy, and the loaded `nvidia-modeset` is the installed module and carries PR #1286.
 
 Then check by hand, in fresh sessions:
 
@@ -95,3 +108,5 @@ The fixture tests model Herdr, Stow and the Omarchy defaults in fake homes; they
 ## Upstream Changes
 
 At each Omarchy package update, run `/omasync` to compare the overridden files with the new defaults and official documentation, confirm every difference is still documented in DEVIATIONS.md, and run `make verify`.
+
+After an update that changes `nvidia-open-dkms` or a kernel, reboot, then run `make verify`; `journalctl -t nvidia-difr-patch` shows how each DKMS build treated the patch ([maintenance](maintenance.md) holds the follow-up). A failed DKMS build leaves that kernel without a display driver: boot the snapshot `omarchy update` took before updating and restore it, as in [setup](setup.md#5-host-system-files).

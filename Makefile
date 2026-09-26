@@ -1,7 +1,9 @@
 # Maintenance automation for EyrArcHy. Stow, clean, recover, and verify run
 # from the repo root on the Omarchy machine; lint, check, twins, and refs run
 # anywhere, including CI. The package list here is the single source of truth
-# for the stow command sets and for scripts/prepare-stow.sh.
+# for the stow command sets and for scripts/prepare-stow.sh. Files under
+# system/ are never stowed: H installs them as root-owned copies, and verify
+# checks the copies.
 # Stow runs without directory folding so every managed parent under $HOME stays
 # a real directory and only leaf files are links.
 
@@ -31,7 +33,7 @@ TWIN_SPECS := nvim/.config/nvim/lua/plugins/obsidian.lua \
   tests/hdw.sh \
   tests/fixtures/herdr
 
-BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*)
+BASH_FILES := bash/.bashrc $(wildcard bash/.config/bash/functions/*) system/etc/dkms/nvidia/nvidia-difr-patch
 LUA_FILES := $(wildcard hypr/.config/hypr/*.lua nvim/.config/nvim/lua/plugins/*.lua)
 TOML_FILES := yazi/.config/yazi/yazi.toml
 OMARCHY_HYPR := /usr/share/omarchy/default/hypr
@@ -64,12 +66,12 @@ help:
 	@echo "  unstow    Remove all package symlinks"
 	@echo "  dry-run   Preview stow actions without making changes"
 	@echo "  restow    Re-stow after repo content changes (Omarchy host, deployed clone only)"
-	@echo "  lint      ShellCheck over the bash package, scripts/, and tests/ (.shellcheckrc holds the disable list)"
+	@echo "  lint      ShellCheck over the bash package, the system/ script, scripts/, and tests/ (.shellcheckrc holds the disable list)"
 	@echo "  check     Repository-only checks: bash, Lua, and TOML syntax, then test (runs in CI)"
 	@echo "  test      Run the tests/ fixtures in fake homes"
 	@echo "  twins     Twin-file sync against the EyrWSL clone at SIBLING (skipped when absent)"
 	@echo "  twins-pair  Read-only committed twin check: full SELF_COMMIT and PEER_COMMIT, with the peer objects at SIBLING"
-	@echo "  verify    lint, check, and twins, then host checks: retired absence, sources/links, real parents, Git identity, Hyprland chords/errors"
+	@echo "  verify    lint, check, and twins, then host checks: retired absence, sources/links, real parents, Git identity, Hyprland chords/errors, system/ copies and the loaded NVIDIA patch"
 	@echo "  clean     Guarded stow preparation: owned folds, dangling clone links and exact retired links; regular files are preserved"
 	@echo "  recover   Re-apply after omarchy-reinstall-configs (clean + restow)"
 	@echo "  refs      Clone and fast-forward listed references to exact upstream parity; report and keep stale clones"
@@ -106,7 +108,7 @@ lint:
 # fixture suites. Needs no Omarchy host, stowed links, or Hyprland session.
 # Fail closed: a missing verifier binary must fail the run, not skip a check.
 check:
-	@for tool in luac python3 git stow; do \
+	@for tool in luac python3 git stow patch zstd; do \
 	  command -v "$$tool" > /dev/null || { echo "FAIL: required verifier '$$tool' is missing"; exit 1; }; \
 	done
 	@fail=0; \
@@ -171,7 +173,8 @@ twins-pair:
 # to the wrong file fails too. Every managed parent must be a real directory:
 # a folded one means a folding deployment that make restow has not replaced.
 # The Git identity check prints no value. The unbind chord check reads the
-# installed Omarchy defaults, so it fails closed off-host.
+# installed Omarchy defaults, so it fails closed off-host. scripts/check-system.sh
+# checks the installed copies of system/ and the loaded NVIDIA module.
 # Explicit retired endpoints are checked even after their sources leave Git;
 # only those known deletions are excluded from the live inventory below.
 verify: require-host lint check twins
@@ -202,6 +205,7 @@ verify: require-host lint check twins
 	  echo "FAIL: git identity does not resolve to a GitHub no-reply address"; fail=1; \
 	fi; \
 	bash scripts/check-bindings.sh hypr/.config/hypr/bindings.lua $(OMARCHY_HYPR) || fail=1; \
+	bash scripts/check-system.sh $$(git ls-files --cached --others --exclude-standard -- system) || fail=1; \
 	if command -v hyprctl > /dev/null && [[ -n "$${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then \
 	  errs="$$(hyprctl configerrors)"; \
 	  if [[ -z "$$errs" || "$$errs" == *"no errors"* ]]; then echo "ok:   no hyprland config errors"; \
