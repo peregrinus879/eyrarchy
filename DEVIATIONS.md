@@ -4,7 +4,7 @@
 
 This document records the intentional differences carried by EyrArcHy relative to [Omarchy](https://github.com/omacom/omarchy) defaults, and defines the boundary between personal desktop customizations and Omarchy-managed behavior.
 
-Omarchy is the upstream reference. This repo carries only targeted personal deviations applied via GNU Stow.
+Omarchy is the upstream reference. This repo carries only targeted personal deviations: dotfiles applied via GNU Stow, and the root-owned host files in `system/`.
 
 ## Deviation Policy
 

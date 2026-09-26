@@ -1,6 +1,6 @@
 # EyrArcHy
 
-Personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop, deployed with [GNU Stow](https://www.gnu.org/software/stow/). Omarchy keeps its defaults; EyrArcHy loads after them and changes only what needs to differ, with every difference and its reason in [DEVIATIONS.md](DEVIATIONS.md).
+Personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop: dotfiles deployed with [GNU Stow](https://www.gnu.org/software/stow/), plus root-owned host files installed as copies. Omarchy keeps its defaults; EyrArcHy loads after them and changes only what needs to differ, with every difference and its reason in [DEVIATIONS.md](DEVIATIONS.md).
 
 ## What You Get
 

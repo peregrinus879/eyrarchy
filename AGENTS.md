@@ -1,6 +1,6 @@
 # AGENTS.md - EyrArcHy
 
-EyrArcHy is a set of personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop, deployed with [GNU Stow](https://www.gnu.org/software/stow/): Bash additions and the `hdw` workspace helper in `bash/`, Hyprland overrides in `hypr/`, additive Neovim plugin specs in `nvim/`, Yazi configuration in `yazi/`, and root-owned host files in `system/`. Omarchy, its official documentation and [DEVIATIONS.md](DEVIATIONS.md) are the source of truth for default behavior and every intentional difference.
+EyrArcHy is a set of personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy) desktop: Bash additions and the `hdw` workspace helper in `bash/`, Hyprland overrides in `hypr/`, additive Neovim plugin specs in `nvim/`, and Yazi configuration in `yazi/`, deployed with [GNU Stow](https://www.gnu.org/software/stow/), plus root-owned host files in `system/`, installed as copies. Omarchy, its official documentation and [DEVIATIONS.md](DEVIATIONS.md) are the source of truth for default behavior and every intentional difference.
 
 ## Loading
 
