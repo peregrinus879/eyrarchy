@@ -4,7 +4,7 @@
 
 This document records the intentional differences carried by EyrArcHy relative to [Omarchy](https://github.com/omacom/omarchy) defaults, and defines the boundary between personal desktop customizations and Omarchy-managed behavior.
 
-Omarchy is the upstream reference. This repo carries only targeted personal deviations: dotfiles applied via GNU Stow, and the root-owned host files in `system/`.
+Omarchy is the upstream reference. This repo carries targeted personal deviations: dotfiles applied via GNU Stow, root-owned host files in `system/`, and personal wallpaper assets. Application and appearance selections are documented for manual restoration.
 
 ## Deviation Policy
 
@@ -15,7 +15,7 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 1. **Source Omarchy defaults first.** Personal overrides come after Omarchy defaults are loaded, not instead of them.
 2. **Keep customizations minimal and targeted.** Only override what needs personal customization. Do not replicate Omarchy behavior.
 3. **Keep scope to personal desktop customizations.** Shared Linux baseline behavior and headless adaptations are out of scope.
-4. **No theme customizations.** Omarchy manages themes. This repo does not track theme files.
+4. **Keep themes upstream-owned.** Omarchy manages theme files and generated colors. Personal wallpaper assets are retained with attribution; [desktop choices](docs/desktop.md) owns the theme selection and restoration procedure.
 5. **Additive Neovim plugin specs only.** `omarchy-nvim` owns the base Neovim config; this repo adds vault-workflow plugin specs on top without touching base options.
 6. **Host system files only where the desktop needs them.** `system/` carries the few root-owned files this laptop's desktop depends on, installed as copies, never stowed ([Host](#host-gu605)).
 
@@ -37,6 +37,11 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 
 - Omarchy has no dotfile manager; EyrArcHy deploys its packages with GNU Stow, using `--no-folding` so managed parents stay real directories and only files are links. Deployment, cleanup and recovery are guarded against taking over or deleting anything the clone cannot prove it owns ([setup](docs/setup.md)).
 - Files shared with EyrWSL are byte-identical twins, checked locally and in CI ([operations](docs/operations.md#make-targets)). `/omasync` owns reference-clone maintenance and upstream comparison.
+
+### Desktop Selections
+
+- [Desktop choices](docs/desktop.md) records personal applications, defaults, service selections and binding prerequisites for manual restoration through native installers and settings. These choices provide the preferred desktop without copying Omarchy's configurations into additional Stow packages.
+- `wallpapers/` retains the personal background with its [attribution](wallpapers/README.md); Omarchy's native controls own selection and theme integration.
 
 ### Bash
 

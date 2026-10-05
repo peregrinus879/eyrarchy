@@ -14,6 +14,8 @@ Claude Code (2.1.277 or later) and OpenCode read this file natively as the proje
 | [README](README.md) | Overview and navigation |
 | [DEVIATIONS.md](DEVIATIONS.md) | Every intentional difference from Omarchy, its reason, and the behavior contracts of `hdw` and Git review |
 | [Setup](docs/setup.md) | Installation, deployment, moves and recovery after Omarchy resets |
+| [Desktop choices](docs/desktop.md) | Manually restored applications, defaults, service selections and appearance |
+| [Wallpaper attribution](wallpapers/README.md) | Source and rights of the personal wallpaper |
 | [Operations](docs/operations.md) | Daily use, verification and Make targets |
 | [Maintenance ledger](docs/maintenance.md) | Open work only; read it before package removals, Omarchy updates or work on a listed item |
 | [`omasync`](.agents/skills/omasync/SKILL.md) | Reconciliation with upstream Omarchy |
@@ -26,6 +28,7 @@ State each fact once, at its owner, and link to it. Git history holds provenance
 - **Target host.** Host-writing targets (`stow`, `unstow`, `restow`, `clean`, `recover`, `verify`) refuse anywhere but an Omarchy host, and each checks that the deployed links belong to this clone before changing anything. `lint`, `check`, `test`, `twins`, `twins-pair` and `refs` run anywhere.
 - **Live configuration.** An edit to a stowed file takes effect at the next shell, Hyprland reload (Hyprland reloads on save), Neovim session or Yazi launch, before any commit. Work on this repository only in a session H is watching.
 - **Layer on Omarchy.** Load Omarchy's defaults first and override only what needs to differ; never copy its defaults, themes, AI launch aliases, Herdr recipes or tmux setup. Every intentional difference is documented in DEVIATIONS.md, and the overview, this file and the affected guides change together with it.
+- **Personal selections.** Application/default/service choices are documentation-led. `wallpapers/` contains personal artwork, installed with Omarchy's native background controls rather than Stow; retain its attribution.
 - **Twins with EyrWSL.** The files in the Makefile's `TWIN_SPECS` (Neovim plugin specs, `hdw`, Yazi configuration, the reference updater and their tests) are byte-identical across EyrArcHy and [EyrWSL](https://github.com/peregrinus879/eyrwsl); shared concepts use identical wording in both repositories, with only repository-specific values differing.
 - **Host system files.** `system/` mirrors paths under `/` and is never stowed or linked: H installs root-owned copies with the commands in [setup](docs/setup.md#5-host-system-files), so a change to one includes those commands for H. `make verify` fails while a copy differs; validate udev rule syntax with `udevadm verify` before installation.
 - **Host-local state.** Git identity and GitHub helper settings live in the untracked `~/.config/git/config.local`, never in a package; credentials never enter the repository.

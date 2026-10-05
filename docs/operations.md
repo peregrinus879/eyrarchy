@@ -82,6 +82,8 @@ make lint check   # ShellCheck 0.11.0 or newer; Bash, Lua and TOML syntax; the f
 
 On Omarchy, after stowing or changing a package, `make verify` runs `lint`, `check` and `twins`, then checks the deployment: retired links are gone, every managed parent is a real directory, each link resolves into this clone, the Git identity is a GitHub no-reply address (without printing it), every `hl.unbind` target exists in Omarchy's defaults and no personal chord collides with a default that is still bound, Hyprland reports no configuration errors, each `system/` file is installed as an identical root-owned regular copy, and the loaded `nvidia-modeset` is the installed module and carries PR #1286.
 
+This verifies declared managed files, not all upstream-owned copies or additional host configuration. Restore and check [desktop selections](desktop.md) manually; [maintenance](maintenance.md#reproducibility-follow-up) tracks outstanding drift and host audits.
+
 Then check by hand, in fresh sessions:
 
 - `type y` shows the Yazi cd-on-exit function and `type hdw` the workspace helper;

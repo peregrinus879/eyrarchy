@@ -4,17 +4,18 @@ Personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy)
 
 ## What You Get
 
-| Package | Adds |
+| Component | Adds |
 | --- | --- |
 | `bash/` | Personal Bash additions on top of Omarchy's, a Yazi cd-on-exit function, and `hdw`, which opens an AI client, Neovim and a shell as a new [Herdr](https://herdr.dev) workspace |
 | `hypr/` | Hyprland keybindings, display, keyboard layout and appearance overrides |
 | `nvim/` | Neovim plugin specs for an Obsidian-style vault and repository-aware Git review, on top of Omarchy's Neovim setup |
 | `yazi/` | [Yazi](https://yazi-rs.github.io) file-manager configuration, using the terminal's theme |
 | `system/` | Root-owned files for this laptop, installed as copies rather than stowed: SysRq recovery keys, browser access for VIA keyboards and a DKMS override that patches the NVIDIA driver's display-freeze bug |
+| `wallpapers/` | Personal wallpaper and attribution, selected through Omarchy's background controls |
 
 ## Requirements
 
-A working Omarchy installation, plus Yazi (`sudo pacman -S yazi`). The vault workflow expects notes at `~/Projects/vault` (or `OBSIDIAN_VAULT`).
+A working Omarchy installation and the [setup prerequisites](docs/setup.md#1-prerequisites). [Desktop choices](docs/desktop.md) records personal applications, binding dependencies and appearance to restore manually. The vault workflow expects notes at `~/Projects/vault` (or `OBSIDIAN_VAULT`).
 
 ## Quick Start
 
@@ -33,6 +34,7 @@ make verify    # repository and deployment checks
 | Need | Read |
 | --- | --- |
 | Install, move or recover | [Setup](docs/setup.md) |
+| Restore personal applications and appearance | [Desktop choices](docs/desktop.md) |
 | Daily use, checks and Make targets | [Operations](docs/operations.md) |
 | What differs from Omarchy, and why | [DEVIATIONS.md](DEVIATIONS.md) |
 | Keys, commands and workflows, offline | [EyrAgents workspace guide](https://github.com/peregrinus879/eyragents/blob/main/docs/workspace-guide.html) (download the raw file) |
@@ -44,4 +46,4 @@ Companion repositories: [EyrWSL](https://github.com/peregrinus879/eyrwsl) brings
 
 ## License
 
-[MIT](LICENSE). Built on Omarchy.
+[MIT](LICENSE) for configuration and documentation; [wallpaper attribution](wallpapers/README.md) covers the third-party artwork. Built on Omarchy.

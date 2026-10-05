@@ -4,16 +4,18 @@
 
 Use this guide on the Omarchy desktop. For an existing deployment, start with [re-stowing or moving the clone](#re-stow); for upstream overwrites, see [recovery](#recovery-after-omarchy-config-resets).
 
+[Desktop choices](desktop.md) covers personal applications, default handlers and appearance after installation.
+
 ## Installation
 
 ### 1. Prerequisites
 
 Omarchy must be installed and functional.
 
-Install Yazi (not part of Omarchy):
+Install Stow, Yazi (not part of Omarchy), and the ShellCheck/Lua tools used by repository checks:
 
 ```bash
-sudo pacman -Syu --needed yazi
+sudo pacman -Syu --needed stow yazi shellcheck lua
 ```
 
 ### AI Clients
@@ -40,6 +42,7 @@ Checklist before stowing:
 
 - Omarchy is installed and functional
 - Yazi is installed
+- The [personal binding dependencies](desktop.md#applications-and-services) are installed before testing those bindings
 - The vault is synced to `~/Projects/vault` (or `OBSIDIAN_VAULT` is set) if you use the Obsidian workflow
 - Reported conflicts were compared and any needed content preserved at explicitly reviewed backup paths
 
