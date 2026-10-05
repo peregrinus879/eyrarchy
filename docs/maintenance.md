@@ -55,6 +55,10 @@ The GitLab reply was posted manually by H. At this recheck `glab` remains unavai
 - **Reference host pass.** On the next reference-dependent maintenance, preview with `make refs-plan`, get approval for new clones or repointing, run `make refs`, and confirm exact fetched parity with local tags and ignored or stale content preserved. Closes when that pass succeeds on the host.
 - **Upstream issues.** [omacom/omarchy#7327](https://github.com/omacom/omarchy/issues/7327) (a `qt6-wayland` install-reason gap after the upgrade, repaired on this host) closes when the issue does. `tdl` ends by selecting an unset pane variable, a cosmetic focus regression; Omarchy's planned user-configuration preservation could overlap this repository's Stow approach when it ships. Both unchanged in 4.0.4; recheck at each Omarchy update.
 
+## Reproducibility Follow-up
+
+- **VIA rule refinement.** H keeps the current [rule](../DEVIATIONS.md#host-gu605) until the external keyboard is connected. Then identify its USB vendor/product IDs and configuration interface, assess device-scoped `uaccess` before `73-seat-late.rules`, and agree migration from `99-via.rules`. Closes with an approved replacement, retirement of the old broad rule, correct permissions after reconnection and a successful browser connection.
+
 ## Revalidation Triggers
 
 - **Each Omarchy package update** (`pacman -Q omarchy`): run `/omasync`, recheck every item above that names a version, then `make verify`.

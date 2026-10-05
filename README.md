@@ -10,7 +10,7 @@ Personal overrides for an installed [Omarchy](https://github.com/omacom/omarchy)
 | `hypr/` | Hyprland keybindings, display, keyboard layout and appearance overrides |
 | `nvim/` | Neovim plugin specs for an Obsidian-style vault and repository-aware Git review, on top of Omarchy's Neovim setup |
 | `yazi/` | [Yazi](https://yazi-rs.github.io) file-manager configuration, using the terminal's theme |
-| `system/` | Root-owned files for this laptop, installed as copies rather than stowed: SysRq recovery keys and a DKMS override that patches the NVIDIA driver's display-freeze bug |
+| `system/` | Root-owned files for this laptop, installed as copies rather than stowed: SysRq recovery keys, browser access for VIA keyboards and a DKMS override that patches the NVIDIA driver's display-freeze bug |
 
 ## Requirements
 

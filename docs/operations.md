@@ -61,6 +61,17 @@ If the desktop stops responding, use the kernel's SysRq keys ([DEVIATIONS.md](..
 
 Alt+PrtSc on its own is Omarchy's screen-recording binding. After the reboot, `journalctl -k -b -1 | grep -A60 'sysrq: Show Blocked State'` shows the dump. A freeze while `make verify` passes means the NVIDIA patch did not prevent it; keep the dump for the upstream report ([maintenance](maintenance.md)).
 
+## VIA Keyboard Access
+
+The [host rule](../DEVIATIONS.md#host-gu605) enables raw HID access for browser-based keyboard configuration. After [installation](setup.md#via-keyboard-access), reconnect the keyboard over USB and check:
+
+```bash
+udevadm verify system/etc/udev/rules.d/99-via.rules
+stat -c '%a %n' /dev/hidraw*
+```
+
+Expect a successful syntax check and mode `666` on the reconnected keyboard's raw HID nodes. `make verify` checks that the installed rule is an identical root-owned copy. In a WebHID-capable browser, open the keyboard's VIA configurator, authorize the device and confirm that it connects. File and permission checks alone do not verify the browser connection.
+
 ## Verify
 
 After any change:

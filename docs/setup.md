@@ -65,7 +65,24 @@ Stow runs without directory folding, so `~/.config/bash`, `~/.config/yazi`, and 
 
 ### 5. Host System Files
 
-`system/` mirrors paths under `/` for this laptop; [DEVIATIONS.md](../DEVIATIONS.md#host-gu605) gives each file's reason and why Stow never links them. Create a snapshot, install root-owned copies, apply the SysRq setting, then reinstall the installed driver version from the package cache, so DKMS rebuilds it through the override for every kernel with headers and the initramfs is regenerated:
+`system/` mirrors paths under `/` for this laptop; [DEVIATIONS.md](../DEVIATIONS.md#host-gu605) gives each file's reason and why Stow never links them.
+
+#### VIA Keyboard Access
+
+Validate the rule, install its root-owned copy and reload udev's rules:
+
+```bash
+cd ~/Projects/eyrie/eyrarchy
+udevadm verify system/etc/udev/rules.d/99-via.rules
+sudo install -D -o root -g root -m 644 system/etc/udev/rules.d/99-via.rules /etc/udev/rules.d/99-via.rules
+sudo udevadm control --reload-rules
+```
+
+Expect the syntax check to report one success and no failures; `install` and the reload are silent on success. The install replaces any existing rule at that path, so compare and preserve different local content first. Reconnect the keyboard over USB to apply the rule to its devices, then follow [verification](operations.md#via-keyboard-access). A rules reload alone does not change existing device permissions. Repeat these steps after editing the tracked rule.
+
+#### SysRq And NVIDIA
+
+Create a snapshot, install root-owned copies, apply the SysRq setting, then reinstall the installed driver version from the package cache, so DKMS rebuilds it through the override for every kernel with headers and the initramfs is regenerated:
 
 ```bash
 omarchy-snapshot create
