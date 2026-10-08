@@ -25,9 +25,7 @@ Start Herdr with `herdr` or Omarchy's `SUPER CTRL RETURN`. In a shell inside it,
 | `hdw oc` | OpenCode (`opencode`) |
 | `hdw oc -c` | OpenCode, continuing the last session (`opencode -c`) |
 
-Each call creates and focuses a new workspace in the current directory: the AI client full-height on the left, Neovim top-right and a shell bottom-right, with the AI client focused. Call it again from any shell, including the new bottom-right one, to open another workspace; existing workspaces keep their names and layouts. Herdr's own controls handle navigation (`Ctrl+Space`, then `c` for a tab or `Shift+C` for a workspace). [DEVIATIONS.md](../DEVIATIONS.md#bash) holds the full contract, including how a failed call preserves state for inspection.
-
-**Claude Code background sessions.** A session sent to the background with `/bg`, or with *Move to background and exit*, keeps running under Claude Code's own daemon, independently of Herdr. While it runs, `claude -c` refuses with `Your most recent conversation is running in the background (session <uuid>)`. `claude agents` lists such sessions; `claude attach <id>` reopens one with its tasks intact, and `claude stop <id>` followed by `claude -c` continues it in the foreground.
+Each call creates and focuses a new workspace in the current directory: the AI client full-height on the left, Neovim top-right and a shell bottom-right, with the AI client focused. Call it again from any shell, including the new bottom-right one, to open another workspace; existing workspaces keep their names and layouts. [DEVIATIONS.md](../DEVIATIONS.md#bash) holds the full contract, including how a failed call preserves state for inspection. For native navigation and client-session controls, use the [workspace guide](#workspace-guide).
 
 Omarchy's own launch aliases (`c`, `cx`, `cy`, `ic`, `ix`, `icx`) are unchanged and remain available in `hdw` shells; `cc` and `oc` are `hdw` arguments, not aliases.
 
@@ -91,6 +89,7 @@ Then check by hand, in fresh sessions:
 - in a disposable Herdr session, `hdw` produces the layout above, repeated calls each create a new workspace, bare `hdw` prints usage, and calls outside Herdr refuse;
 - `SUPER G` toggles window grouping, `SUPER ALT G` moves a window out of its group, `SUPER ALT B` opens Basecamp, `SUPER ALT C` opens ChatGPT on the web and `SUPER SHIFT C` the ChatGPT app;
 - `yazi` shows the configured layout and sort order;
+- Neovim starts with the selected Omarchy theme and reapplies it on theme reload;
 - a vault note loads obsidian.nvim (`<leader>oo` opens the note switcher);
 - Git review targets the selected repository when Neovim was started in a non-Git parent directory, without changing `:pwd`.
 

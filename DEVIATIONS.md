@@ -69,7 +69,7 @@ Omarchy manages its own defaults, themes, and desktop configs. This repo sources
 
 ### Neovim
 
-- `omarchy-nvim` owns the base Neovim config. This repo adds vault plugin specs and contextual Git-review mappings without editing the base or installed plugin caches.
+- `omarchy-nvim` owns the base Neovim config. This repo adds vault plugin specs and contextual Git-review mappings without deploying base configuration or plugin caches. The [maintenance ledger](docs/maintenance.md#neovim-theme-source-exception) records a temporary host-local theme-source exception.
 - `obsidian.lua` configures obsidian.nvim against the vault at `~/Projects/vault` (override with `OBSIDIAN_VAULT`), including slug-rename and promote workflows that shell out to the vault's `normalize.py`, plus confirm-prompted delete workflows.
 - The same tracked spec sets `vim.g.markdown_folding = 1` while Lazy loads the plugin specifications.
 - `render-markdown.lua` adds visual markdown rendering; a companion, not required by obsidian.nvim.
