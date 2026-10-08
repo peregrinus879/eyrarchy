@@ -61,14 +61,20 @@ Alt+PrtSc on its own is Omarchy's screen-recording binding. After the reboot, `j
 
 ## VIA Keyboard Access
 
-The [host rule](../DEVIATIONS.md#host-gu605) enables raw HID access for browser-based keyboard configuration. After [installation](setup.md#via-keyboard-access), reconnect the keyboard over USB and check:
+After [installation](setup.md#via-keyboard-access), reconnect each supported keyboard by USB and inspect its device properties and access-control list:
 
 ```bash
-udevadm verify system/etc/udev/rules.d/99-via.rules
-stat -c '%a %n' /dev/hidraw*
+udevadm verify system/etc/udev/rules.d/72-keyboard-config.rules
+for node in /dev/hidraw*; do
+  udevadm info --query=property --name="$node" |
+    grep -E '^(DEVNAME|ID_VENDOR_ID|ID_MODEL_ID|ID_USB_INTERFACE_NUM)='
+  getfacl -p "$node"
+done
 ```
 
-Expect a successful syntax check and mode `666` on the reconnected keyboard's raw HID nodes. `make verify` checks that the installed rule is an identical root-owned copy. In a WebHID-capable browser, open the keyboard's VIA configurator, authorize the device and confirm that it connects. File and permission checks alone do not verify the browser connection.
+Match the USB IDs and interface against the [rule](../system/etc/udev/rules.d/72-keyboard-config.rules); device-node numbers can change on reconnection. The configuration node should be owned by root, with a named `rw-` ACL for the active desktop user and `other::---`. Mode bits alone do not identify who has ACL access. Other interfaces and devices follow their own rules, including any local Ledger policy. `make verify` checks the installed copy and rejects a leftover `99-via.rules`.
+
+In a WebHID-capable browser, confirm that the keymap loads in [Keychron Launcher](https://launcher.keychron.com/) for the V8 Max, [VIA](https://usevia.app/) for each Neo Ergo variant, and [Qwertykeys' configurator](https://cfg.qwertykeys.com/) for the Alice Duo. This browser check is required in addition to file and permission checks.
 
 ## Verify
 

@@ -72,16 +72,19 @@ Stow runs without directory folding, so `~/.config/bash`, `~/.config/yazi`, and 
 
 #### VIA Keyboard Access
 
-Validate the rule, install its root-owned copy and reload udev's rules:
+Validate the [scoped rule](../DEVIATIONS.md#host-gu605), install its root-owned copy, preserve the retired broad rule outside `rules.d` if present, and reload udev. Compare and preserve any different existing destination before replacing it. The backup move refuses an existing backup; stop and inspect that case rather than overwriting it.
 
 ```bash
 cd ~/Projects/eyrie/eyrarchy
-udevadm verify system/etc/udev/rules.d/99-via.rules
-sudo install -D -o root -g root -m 644 system/etc/udev/rules.d/99-via.rules /etc/udev/rules.d/99-via.rules
+udevadm verify system/etc/udev/rules.d/72-keyboard-config.rules &&
+sudo install -D -o root -g root -m 644 system/etc/udev/rules.d/72-keyboard-config.rules /etc/udev/rules.d/72-keyboard-config.rules &&
+if [[ -e /etc/udev/rules.d/99-via.rules || -L /etc/udev/rules.d/99-via.rules ]]; then
+  sudo mv -T --update=none-fail -- /etc/udev/rules.d/99-via.rules /etc/udev/99-via.rules.pre-keyboard-config
+fi &&
 sudo udevadm control --reload-rules
 ```
 
-Expect the syntax check to report one success and no failures; `install` and the reload are silent on success. The install replaces any existing rule at that path, so compare and preserve different local content first. Reconnect the keyboard over USB to apply the rule to its devices, then follow [verification](operations.md#via-keyboard-access). A rules reload alone does not change existing device permissions. Repeat these steps after editing the tracked rule.
+Expect the syntax check to report one success and no failures; the other commands are silent on success. Leave package-provided rules and unrelated local rules in place. Reconnect a keyboard by USB to apply the new rule, then follow [verification](operations.md#via-keyboard-access). When migrating from the broad rule, reboot normally to recreate internal HID nodes too: reloading rules alone does not clear their old permissions. Repeat installation and reconnection after editing the tracked rule.
 
 #### SysRq And NVIDIA
 

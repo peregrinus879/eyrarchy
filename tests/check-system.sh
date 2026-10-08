@@ -5,6 +5,8 @@
 # the DKMS override installed, a module without PR #1286, one whose build ID
 # differs from the loaded note, or an unknown compression fails; without it,
 # no module is read.
+# The scoped keyboard rule requires the broad predecessor to be absent;
+# a known pending source deletion is allowed, not arbitrary missing sources.
 # The directory-owner check needs root to fixture and runs only on the host.
 set -euo pipefail
 
@@ -47,6 +49,23 @@ install_root
 module "$TMP/note" "${MARKERS[@]}"
 check "${FILES[@]}" >/dev/null || fail "matching copies and a patched loaded module were rejected"
 
+# An unstaged rename still exposes the retired source through git ls-files.
+check "${FILES[@]}" system/etc/udev/rules.d/99-via.rules >/dev/null || fail "known pending keyboard-rule deletion was rejected"
+expect_failure "retired source without its replacement in scope" check system/etc/udev/rules.d/99-via.rules
+printf '# not a managed source\n' >"$TMP/root/etc/udev/rules.d/missing.rules"
+expect_failure "unrelated missing source" check "${FILES[@]}" system/etc/udev/rules.d/missing.rules
+install_root
+
+printf '# old broad permissions\n' >"$TMP/root/etc/udev/rules.d/99-via.rules"
+expect_failure "retired keyboard rule still installed" check "${FILES[@]}"
+install_root
+ln -s "$TMP/no-such-rule" "$TMP/root/etc/udev/rules.d/99-via.rules"
+expect_failure "dangling retired keyboard-rule link" check "${FILES[@]}"
+install_root
+mkdir "$TMP/root/etc/udev/rules.d/99-via.rules"
+expect_failure "directory at retired keyboard-rule path" check "${FILES[@]}"
+install_root
+
 module "$TMP/note" "${MARKERS[0]}"
 expect_failure "module without PR #1286" check "${FILES[@]}"
 module "$TMP/other-note" "${MARKERS[@]}"
@@ -83,4 +102,4 @@ install -D -m 644 system/etc/sysctl.d/99-sysrq.conf "$TMP/root/etc/sysctl.d/99-s
 rm "$TMP/module.ko" "$TMP/note"
 check system/etc/sysctl.d/99-sysrq.conf >/dev/null || fail "module checks ran without the DKMS override"
 
-printf 'ok:   system copies are owned, identical and unlinked, and the loaded nvidia-modeset carries PR #1286\n'
+printf 'ok:   system copies are owned, identical and unlinked, the broad keyboard rule is retired, and the loaded nvidia-modeset carries PR #1286\n'

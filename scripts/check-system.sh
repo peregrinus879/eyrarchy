@@ -7,6 +7,9 @@
 # nvidia-modeset module must carry PR #1286 and must be the loaded module
 # (the loaded build-ID note appears in the installed file). SYSTEM_ROOT,
 # SYSTEM_OWNER, NVIDIA_MODESET_MODULE and NVIDIA_MODESET_NOTE exist for tests.
+# Checking the scoped keyboard rule also requires retirement of 99-via.rules.
+# Its missing source may remain in Git's index until the rename is staged;
+# only that exact pending deletion is skipped when its replacement is checked.
 # Usage: check-system.sh <system/...>...
 set -euo pipefail
 
@@ -15,7 +18,22 @@ owner=${SYSTEM_OWNER:-root}
 (($#)) || { printf 'FAIL: no system files given\n' >&2; exit 1; }
 
 fail=0
+keyboard_rule=system/etc/udev/rules.d/72-keyboard-config.rules
+retired_rule=system/etc/udev/rules.d/99-via.rules
+keyboard_in_scope=0
 for src in "$@"; do
+  if [[ $src == "$keyboard_rule" ]]; then keyboard_in_scope=1; fi
+done
+retired_target="$root/${retired_rule#system/}"
+if ((keyboard_in_scope)) && [[ -e $retired_target || -L $retired_target ]]; then
+  printf 'FAIL: %s is retired; preserve it outside rules.d per docs/setup.md\n' "$retired_target"
+  fail=1
+fi
+
+for src in "$@"; do
+  if ((keyboard_in_scope)) && [[ $src == "$retired_rule" && ! -e $src && ! -L $src ]]; then
+    continue
+  fi
   target="$root/${src#system/}"
   if [[ -L $target ]]; then
     printf 'FAIL: %s is a link; install a root-owned copy\n' "$target"; fail=1

@@ -1,0 +1,14 @@
+# Direct-USB configuration interfaces; 60-persistent-hidraw.rules supplies IDs,
+# and 73-seat-late.rules grants the active desktop user access via uaccess.
+
+# Keychron V8 Max
+ACTION!="remove", SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ENV{ID_BUS}=="usb", ENV{ID_VENDOR_ID}=="3434", ENV{ID_MODEL_ID}=="0980", ENV{ID_USB_INTERFACE_NUM}=="01", MODE="0600", TAG+="uaccess"
+
+# Neo Ergo Wired
+ACTION!="remove", SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ENV{ID_BUS}=="usb", ENV{ID_VENDOR_ID}=="4e45", ENV{ID_MODEL_ID}=="4552", ENV{ID_USB_INTERFACE_NUM}=="01", MODE="0600", TAG+="uaccess"
+
+# Neo Ergo Tri-mode
+ACTION!="remove", SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ENV{ID_BUS}=="usb", ENV{ID_VENDOR_ID}=="fffe", ENV{ID_MODEL_ID}=="004b", ENV{ID_USB_INTERFACE_NUM}=="01", MODE="0600", TAG+="uaccess"
+
+# QK Alice Duo Dual-mode
+ACTION!="remove", SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ENV{ID_BUS}=="usb", ENV{ID_VENDOR_ID}=="4f57", ENV{ID_MODEL_ID}=="4110", ENV{ID_USB_INTERFACE_NUM}=="01", MODE="0600", TAG+="uaccess"
