@@ -89,6 +89,7 @@ Then check by hand, in fresh sessions:
 - in a disposable Herdr session, `hdw` produces the layout above, repeated calls each create a new workspace, bare `hdw` prints usage, and calls outside Herdr refuse;
 - `SUPER G` toggles window grouping, `SUPER ALT G` moves a window out of its group, `SUPER ALT B` opens Basecamp, `SUPER ALT C` opens ChatGPT on the web and `SUPER SHIFT C` the ChatGPT app;
 - `yazi` shows the configured layout and sort order;
+- the [system-menu shortcuts](../DEVIATIONS.md#hyprland) work on the laptop and external keyboard, and Escape alone dismisses the menu;
 - Neovim starts with the selected Omarchy theme and reapplies it on theme reload;
 - a vault note loads obsidian.nvim (`<leader>oo` opens the note switcher);
 - Git review targets the selected repository when Neovim was started in a non-Git parent directory, without changing `:pwd`.

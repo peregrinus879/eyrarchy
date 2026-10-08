@@ -54,6 +54,7 @@ The GitLab reply was posted manually by H. At this recheck `glab` remains unavai
 
 ## Deferred Work
 
+- **Workspace guide reconciliation.** Add the [system-menu keyboard alias](../DEVIATIONS.md#hyprland) to EyrAgents' `docs/workspace-guide-src/host-reference.json` and regenerate its guide. Closes when the Omarchy guide includes the additional shortcut.
 - **DIFR fix evidence.** Whether the patch stops the freezes rests on direct evidence only. In the kernel log (`journalctl -k --grep 'GPFIFO|DIFR prefetch'`), `Timed out waiting for a free GPFIFO entry.` while the desktop keeps running shows the new bound engaged; `Failed to reset the DIFR prefetch channel.` shows a partial failure, prefetch disabled until the next modeset, and also goes in the report. A freeze with the patched module loaded shows the patch is insufficient, and its SysRq dump ([operations](operations.md#desktop-freeze)) goes with the report. Closes when either occurs and a follow-up to [PR #1286](https://github.com/NVIDIA/open-gpu-kernel-modules/pull/1286) is posted with H's approval, or when the override is retired.
 
 - **Reference host pass.** On the next reference-dependent maintenance, preview with `make refs-plan`, get approval for new clones or repointing, run `make refs`, and confirm exact fetched parity with local tags and ignored or stale content preserved. Closes when that pass succeeds on the host.

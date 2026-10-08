@@ -15,6 +15,9 @@ hl.unbind("SUPER + SHIFT + S")        -- Google Maps
 hl.unbind("SUPER + SHIFT + X")        -- X
 hl.unbind("SUPER + SHIFT + ALT + X")  -- X Post
 
+-- Additional system-menu chord for combined Esc/grave keys.
+o.bind("SUPER + grave", "System menu", "omarchy-menu toggle system")
+
 -- Desktop apps; ChatGPT reuses the retired Calendar key
 o.bind("SUPER + SHIFT + A", "AppImages", "uwsm-app -- it.mijorus.gearlever")
 o.bind("SUPER + SHIFT + C", "ChatGPT (app)", { launch = "chatgpt", focus = "^chatgpt$" })
